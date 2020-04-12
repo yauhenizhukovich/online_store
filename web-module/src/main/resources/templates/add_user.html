@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add user</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-3 text-center"><strong>ADD USER</strong></h1>
+<div class="container">
+    <div class="row">
+        <div class="col-sm">
+        </div>
+        <div class="col-sm">
+            <form action="#" th:action="@{/users/add}" method="post" th:object="${user}">
+                <fieldset>
+                    <div class="form-group">
+                        First name: <input type="text" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"
+                                           th:value="*{firstName}">
+                    </div>
+                    <div class="form-group">
+                        Last name: <input type="text" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="lastName"
+                                          th:value="*{lastName}">
+                    </div>
+                    <div class="form-group">
+                        Patronymic: <input type="text" minlength="2"  maxlength="40" pattern="^[a-zA-Z]+$" name="patronymic"
+                                           th:value="*{patronymic}">
+                    </div>
+                    <div class="form-group">
+                        Email: <input type="email" maxlength="50" name="email" th:value="*{email}"/>
+                    </div>
+                    <div class="form-group">
+                        Role: <select name="role">
+                        <option th:each="role : ${roles}" th:text="${#strings.replace(role,'_',' ').toLowerCase()}" th:value="${role}">
+                            Role
+                        </option>
+                    </select>
+                    </div>
+                    <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"/>
+                    <div th:unless="${#fields.hasErrors('firstName')}" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"/>
+                    <div th:unless="${#fields.hasErrors('lastName')}" th:if="${#fields.hasErrors('patronymic')}" th:errors="*{patronymic}"/>
+                    <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"/>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                    <br><br>
+                    <a th:href="@{/users}" class="btn btn-primary" role="button">Back to users</a>
+                </fieldset>
+            </form>
+        </div>
+        <div class="col-sm">
+        </div>
+    </div>
+</div>
+</body>
+</html>

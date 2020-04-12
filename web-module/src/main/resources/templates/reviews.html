@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Reviews</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-4 text-center"><strong>REVIEWS</strong></h1>
+<div class="col" th:if="${not #lists.isEmpty(reviews)}">
+    <form action="#" th:action="@{/reviews/update/active(pageNumber=${pageNumber})}" method="post">
+        <table class="table table-bordered text-center">
+            <thead>
+            <tr>
+                <td></td>
+                <td scope="col">#</td>
+                <td scope="col">Full name</td>
+                <td scope="col">Review</td>
+                <td scope="col">Date</td>
+                <td scope="col">Status</td>
+                <td></td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="review, status : ${reviews}">
+                <td>
+                    <input type="checkbox" name="ids" th:value="${review.id}"/>
+                </td>
+                <td scope="row" th:text="${status.count}"></td>
+                <td th:text="${review.fullName}">Name not defined</td>
+                <td th:text="${review.reviewText}">Review text not defined</td>
+                <td th:text="${review.date}">Date not defined</td>
+                <td th:text="${review.active} ? 'SHOWED' : 'NOT SHOWED'">Status not defined</td>
+                <td>
+                    <div th:if="${#lists.size(reviews)==1}">
+                        <div th:if="${pageNumber!=1}">
+                            <a th:href="@{/reviews/{id}/delete(id=${review.id}, pageNumber=${pageNumber}-1)}" class="btn btn-danger"
+                               role="button">Delete
+                                review</a>
+                        </div>
+                    </div>
+                    <div th:unless="${#lists.size(reviews)==1}">
+                        <a th:href="@{/reviews/{id}/delete(id=${review.id}, pageNumber=${pageNumber})}" class="btn btn-danger"
+                           role="button">Delete
+                            review</a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.size(pages) gt 1}" class="text-center">
+            Pages<br>
+            <div class="btn-group mr-2 text-center" role="group">
+                <div th:each="page : ${pages}">
+                    <a th:href="@{/reviews/page/{pageNumber}(pageNumber=${page})}" th:text="${page}" th:value="${page}"
+                       class="btn btn-secondary"
+                       role="button">Page Number</a>
+                </div>
+            </div>
+        </div>
+        <br>
+        <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+        <input type="submit" class="btn btn-primary" value="Update checked reviews status"/>
+    </form>
+</div>
+<div class="lead text-center" th:unless="${not #lists.isEmpty(reviews)}">
+    <p>There are no reviews...</p>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

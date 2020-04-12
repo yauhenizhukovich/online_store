@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Welcome page</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-3 text-center"><strong>ADMINISTRATOR ACCESS AREA</strong></h1>
+<a href="#" th:href="@{/users}" class="btn btn-success btn-lg btn-block" role="button">Activity with users</a>
+<a href="#" th:href="@{/reviews}" class="btn btn-success btn-lg btn-block" role="button">Activity with reviews</a><br>
+<div class="text-center">
+    <a href="#" th:href="@{/users/login}" class="btn btn-primary btn-lg" role="button">Log in</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>
