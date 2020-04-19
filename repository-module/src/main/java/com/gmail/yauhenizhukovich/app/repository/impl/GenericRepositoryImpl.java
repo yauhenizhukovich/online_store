@@ -27,9 +27,8 @@ public abstract class GenericRepositoryImpl<I, T> implements GenericRepository<I
     }
 
     @Override
-    public boolean delete(T t) {
+    public void delete(T t) {
         entityManager.remove(t);
-        return true;
     }
 
     @Override
@@ -42,6 +41,14 @@ public abstract class GenericRepositoryImpl<I, T> implements GenericRepository<I
         String queryString = "SELECT COUNT(*) FROM " + entityClass.getSimpleName() + " e";
         Query query = entityManager.createQuery(queryString);
         return (Long) query.getSingleResult();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<T> getAll() {
+        String queryString = "FROM " + entityClass.getSimpleName() + " e";
+        Query query = entityManager.createQuery(queryString);
+        return (List<T>) query.getResultList();
     }
 
     @Override

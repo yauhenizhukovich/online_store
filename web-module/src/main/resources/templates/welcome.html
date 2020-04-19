@@ -8,8 +8,11 @@
 </head>
 <body>
 <h1 class="display-3 text-center"><strong>ADMINISTRATOR ACCESS AREA</strong></h1>
-<a href="#" th:href="@{/users}" class="btn btn-success btn-lg btn-block" role="button">Activity with users</a>
-<a href="#" th:href="@{/reviews}" class="btn btn-success btn-lg btn-block" role="button">Activity with reviews</a><br>
+<a href="#" th:href="@{/users}" class="btn btn-success btn-lg btn-block" role="button">Users</a>
+<a href="#" th:href="@{/reviews}" class="btn btn-success btn-lg btn-block" role="button">Reviews</a>
+<a href="#" th:href="@{/articles}" class="btn btn-success btn-lg btn-block" role="button">Articles</a>
+<a href="#" th:href="@{/users/profile}" class="btn btn-success btn-lg btn-block" role="button">Check your profile</a><br>
+<div th:if="${param.message}" th:text="${param.message}"/>
 <div class="text-center">
     <a href="#" th:href="@{/users/login}" class="btn btn-primary btn-lg" role="button">Log in</a>
 </div>

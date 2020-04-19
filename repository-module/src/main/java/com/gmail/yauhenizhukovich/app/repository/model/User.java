@@ -10,8 +10,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -31,7 +29,7 @@ public class User {
     private String password;
     @Column
     @Enumerated(EnumType.STRING)
-    private RoleEnum role;
+    private RoleEnumRepository role;
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private UserDetails userDetails;
 
@@ -59,11 +57,11 @@ public class User {
         this.password = password;
     }
 
-    public RoleEnum getRole() {
+    public RoleEnumRepository getRole() {
         return role;
     }
 
-    public void setRole(RoleEnum role) {
+    public void setRole(RoleEnumRepository role) {
         this.role = role;
     }
 
@@ -91,16 +89,17 @@ public class User {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        User user = (User) o;
-        return Objects.equals(id, user.id) &&
-                Objects.equals(password, user.password) &&
-                role == user.role &&
-                Objects.equals(userDetails, user.userDetails);
+        User that = (User) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(email, that.email) &&
+                Objects.equals(password, that.password) &&
+                role == that.role &&
+                Objects.equals(userDetails, that.userDetails);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, password, role, userDetails);
+        return Objects.hash(id, email, password, role, userDetails);
     }
 
 }

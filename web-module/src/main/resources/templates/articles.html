@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Articles</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-4 text-center"><strong>ARTICLES</strong></h1>
+<div class="col" th:if="${not #lists.isEmpty(articles)}">
+    <table class="table table-bordered text-center">
+        <thead>
+        <tr>
+            <td scope="col">#</td>
+            <td scope="col">Date</td>
+            <td scope="col">Title</td>
+            <td scope="col">Author name</td>
+            <td scope="col">Rundown</td>
+            <td></td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="article, status : ${articles}">
+            <td scope="row" th:text="${status.count}"></td>
+            <td th:text="${article.date}">Date not defined</td>
+            <td th:text="${article.title}">Title not defined</td>
+            <td th:text="${article.authorFirstName + ' ' + article.authorLastName}">Author not defined</td>
+            <td th:text="${article.rundown}">Rundown not defined</td>
+            <td>
+                <a th:href="@{/articles/{id}(id=${article.id})}" class="btn btn-success"
+                   role="button">Full article</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div th:if="${#lists.size(pages) gt 1}" class="text-center">
+        Pages<br>
+        <div class="btn-group mr-2 text-center" role="group">
+            <div th:each="page : ${pages}">
+                <a th:href="@{/articles(page=${page})}" th:text="${page}" th:value="${page}"
+                   class="btn btn-secondary"
+                   role="button">Page Number</a>
+            </div>
+        </div>
+    </div>
+    <br>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<div class="lead text-center" th:unless="${not #lists.isEmpty(articles)}">
+    <p>There are no articles...</p>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

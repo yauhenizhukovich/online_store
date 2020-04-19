@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-4 text-center" th:text="${'USER ' + user.email}"><strong>USER</strong></h1>
+<dl class="row">
+    <dt class="col-sm-3">Unique number:</dt>
+    <dd class="col-sm-9" th:text="${user.uniqueNumber}">Not defined</dd>
+
+    <dt class="col-sm-3">First name:</dt>
+    <dd class="col-sm-9" th:text="${user.firstName}">Not defined</dd>
+
+    <dt class="col-sm-3">Last name:</dt>
+    <dd class="col-sm-9" th:text="${user.lastName}">Not defined</dd>
+
+    <dt class="col-sm-3">Patronymic:</dt>
+    <dd class="col-sm-9" th:text="${user.patronymic}">Not defined</dd>
+
+    <dt class="col-sm-3">Email:</dt>
+    <dd class="col-sm-9" th:text="${user.email}">Not defined</dd>
+
+    <dt class="col-sm-3">Role:</dt>
+    <dd class="col-sm-9" th:text="${user.role}">Not defined</dd>
+
+    <dt class="col-sm-3"></dt>
+    <dd class="col-sm-9">
+        <form action="#" th:action="@{/users/{uniqueNumber}(uniqueNumber=${uniqueNumber})}" method="post">
+            <input type="submit" class="btn btn-primary" value="Change role"/>
+            <select name="role">
+                <option th:each="role : ${roles}" th:text="${#strings.replace(role,'_',' ').toLowerCase()}"
+                        th:value="${role}">
+                    Role
+                </option>
+            </select>
+        </form>
+    </dd>
+</dl>
+<div th:if="${roleMessage ne null}" th:text="${roleMessage}"></div>
+<div th:if="${passwordMessage ne null}" th:text="${passwordMessage}"></div>
+<form action="#" th:action="@{/users/{uniqueNumber}(uniqueNumber=${user.uniqueNumber}, destination='user')}"
+      method="post">
+    <input type="submit" class="btn btn-primary" value="Generate new password"/>
+</form>
+<form action="#" th:action="@{/users/delete(uniqueNumbers=${user.uniqueNumber})}"
+      method="post">
+    <input type="submit" class="btn btn-primary" value="Delete user"/>
+</form>
+<a th:href="@{/users/add}" class="btn btn-primary" role="button">Add new user</a>
+<a th:href="@{/users}" class="btn btn-primary" role="button">Back to users page</a>
+<a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

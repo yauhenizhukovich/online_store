@@ -12,8 +12,9 @@
         <div class="col-sm">
         </div>
         <div class="col-sm">
-            <form action="#" th:action="@{/users/add}" method="post" th:object="${user}">
+            <form action="#" th:action="@{/users}" method="post" th:object="${user}">
                 <fieldset>
+                    <div th:if="${user ne null}" th:name="User_model"></div>
                     <div class="form-group">
                         First name: <input type="text" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"
                                            th:value="*{firstName}">
@@ -23,7 +24,7 @@
                                           th:value="*{lastName}">
                     </div>
                     <div class="form-group">
-                        Patronymic: <input type="text" minlength="2"  maxlength="40" pattern="^[a-zA-Z]+$" name="patronymic"
+                        Patronymic: <input type="text" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="patronymic"
                                            th:value="*{patronymic}">
                     </div>
                     <div class="form-group">
@@ -36,10 +37,19 @@
                         </option>
                     </select>
                     </div>
+                    <div class="form-group">
+                        Address: <input type="address" maxlength="100" name="address" th:value="*{address}"/>
+                    </div>
+                    <div class="form-group">
+                        Telephone: <input type="telephone" maxlength="40" name="telephone" th:value="*{telephone}"/>
+                    </div>
+                    <div th:if="${param.error}" th:text="${param.error}"/>
                     <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"/>
-                    <div th:unless="${#fields.hasErrors('firstName')}" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"/>
-                    <div th:unless="${#fields.hasErrors('lastName')}" th:if="${#fields.hasErrors('patronymic')}" th:errors="*{patronymic}"/>
+                    <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"/>
+                    <div th:if="${#fields.hasErrors('patronymic')}" th:errors="*{patronymic}"/>
                     <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"/>
+                    <div th:if="${#fields.hasErrors('address')}" th:errors="*{address}"/>
+                    <div th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}"/>
                     <button type="submit" class="btn btn-primary">Add</button>
                     <br><br>
                     <a th:href="@{/users}" class="btn btn-primary" role="button">Back to users</a>

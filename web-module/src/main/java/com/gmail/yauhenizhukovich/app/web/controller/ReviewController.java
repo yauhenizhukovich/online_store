@@ -16,35 +16,34 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/reviews")
 public class ReviewController {
 
-    private ReviewService reviewService;
+    private final ReviewService reviewService;
 
     public ReviewController(ReviewService reviewService) {this.reviewService = reviewService;}
 
     @GetMapping
-    public String getAllReviews() {
-        return "redirect:/reviews/page/1";
-    }
-
-    @GetMapping("/page/{pageNumber}")
-    public String getReviewsByPage(@PathVariable Integer pageNumber, Model model) {
-        List<ReviewDTO> reviews = reviewService.getReviewsByPage(pageNumber);
+    public String getReviews(@RequestParam(required = false) Integer page, Model model) {
+        if (page == null) {
+            page = 1;
+        }
+        List<ReviewDTO> reviews = reviewService.getReviewsByPage(page);
         model.addAttribute("reviews", reviews);
-        List<Integer> pages = reviewService.getListOfPageNumbers();
+        List<Integer> pages = reviewService.getPages();
         model.addAttribute("pages", pages);
-        model.addAttribute("pageNumber", pageNumber);
         return "reviews";
     }
 
-    @GetMapping("/{id}/delete")
-    public String deleteReviewById(@PathVariable Long id, @RequestParam String pageNumber) {
-        reviewService.deleteReviewById(id);
-        return "redirect:/reviews/page/" + pageNumber;
+    @PostMapping
+    public String updateReviews(@RequestParam(required = false) Long[] ids) {
+        if (ids != null) {
+            reviewService.updateActivityByIds(ids);
+        }
+        return "redirect:/reviews";
     }
 
-    @PostMapping("/update/active")
-    public String updateReviewsActivity(@RequestParam Long[] ids, @RequestParam String pageNumber) {
-        reviewService.updateActivityByIds(ids);
-        return "redirect:/reviews/page/" + pageNumber;
+    @PostMapping("/{id}")
+    public String deleteReviewById(@PathVariable Long id) {
+        reviewService.deleteReviewById(id);
+        return "redirect:/reviews";
     }
 
 }

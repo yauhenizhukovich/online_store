@@ -23,13 +23,13 @@ public class LoginAccessDeniedHandler implements AccessDeniedHandler {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             logger.info(
-                    authentication.getName() +
+                    authentication.getName() + " with role " + authentication.getAuthorities().toString() +
                             " was trying to access protected resource: " +
                             httpServletRequest.getRequestURI()
             );
         }
         httpServletResponse.sendRedirect(
-                httpServletRequest.getContextPath() + "/welcome?message=" + ACCESS_DENIED_MESSAGE
+                httpServletRequest.getContextPath() + "?message=" + ACCESS_DENIED_MESSAGE
         );
     }
 

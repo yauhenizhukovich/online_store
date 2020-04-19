@@ -9,7 +9,7 @@
 <body>
 <h1 class="display-4 text-center"><strong>REVIEWS</strong></h1>
 <div class="col" th:if="${not #lists.isEmpty(reviews)}">
-    <form action="#" th:action="@{/reviews/update/active(pageNumber=${pageNumber})}" method="post">
+    <form action="#" th:action="@{/reviews}" method="post">
         <table class="table table-bordered text-center">
             <thead>
             <tr>
@@ -33,18 +33,8 @@
                 <td th:text="${review.date}">Date not defined</td>
                 <td th:text="${review.active} ? 'SHOWED' : 'NOT SHOWED'">Status not defined</td>
                 <td>
-                    <div th:if="${#lists.size(reviews)==1}">
-                        <div th:if="${pageNumber!=1}">
-                            <a th:href="@{/reviews/{id}/delete(id=${review.id}, pageNumber=${pageNumber}-1)}" class="btn btn-danger"
-                               role="button">Delete
-                                review</a>
-                        </div>
-                    </div>
-                    <div th:unless="${#lists.size(reviews)==1}">
-                        <a th:href="@{/reviews/{id}/delete(id=${review.id}, pageNumber=${pageNumber})}" class="btn btn-danger"
-                           role="button">Delete
-                            review</a>
-                    </div>
+                    <input type="submit" th:formaction="@{/reviews/{id}(id=${review.id})}" class="btn btn-danger" formmethod="post"
+                           value="Delete review"/>
                 </td>
             </tr>
             </tbody>
@@ -53,9 +43,9 @@
             Pages<br>
             <div class="btn-group mr-2 text-center" role="group">
                 <div th:each="page : ${pages}">
-                    <a th:href="@{/reviews/page/{pageNumber}(pageNumber=${page})}" th:text="${page}" th:value="${page}"
+                    <a th:href="@{/reviews(page=${page})}" th:text="${page}" th:value="${page}"
                        class="btn btn-secondary"
-                       role="button">Page Number</a>
+                       role="button">Page</a>
                 </div>
             </div>
         </div>

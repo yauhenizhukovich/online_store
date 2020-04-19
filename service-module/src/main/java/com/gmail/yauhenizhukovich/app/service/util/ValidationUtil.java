@@ -6,8 +6,12 @@ import java.util.regex.Pattern;
 import com.gmail.yauhenizhukovich.app.service.model.UserDTO;
 
 import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.EMAIL_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NAME_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NAME_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.FIRSTNAME_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.FIRSTNAME_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.LASTNAME_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.LASTNAME_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.PATRONYMIC_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.PATRONYMIC_SIZE_MESSAGE;
 import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.EMAIL_PATTERN;
 import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_FIRSTNAME_SIZE;
 import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_LASTNAME_SIZE;
@@ -25,7 +29,7 @@ public class ValidationUtil {
         }
     }
 
-    public static void validateUserDTO(UserDTO userDTO) {
+    public static void validateUser(UserDTO userDTO) {
         String firstName = userDTO.getFirstName();
         validateFirstName(firstName);
         String lastName = userDTO.getLastName();
@@ -39,36 +43,36 @@ public class ValidationUtil {
     private static void validateFirstName(String firstName) {
         int length = firstName.length();
         if (length < MIN_NAME_SIZE || length > MAX_FIRSTNAME_SIZE) {
-            throw new IllegalArgumentException(NAME_SIZE_MESSAGE);
+            throw new IllegalArgumentException(FIRSTNAME_SIZE_MESSAGE);
         }
         Pattern pattern = Pattern.compile(NAME_PATTERN);
         Matcher matcher = pattern.matcher(firstName);
         if (!matcher.find()) {
-            throw new IllegalArgumentException(NAME_PATTERN_MESSAGE);
+            throw new IllegalArgumentException(FIRSTNAME_PATTERN_MESSAGE);
         }
     }
 
     private static void validateLastName(String lastName) {
         int length = lastName.length();
         if (length < MIN_NAME_SIZE || length > MAX_LASTNAME_SIZE) {
-            throw new IllegalArgumentException(NAME_SIZE_MESSAGE);
+            throw new IllegalArgumentException(LASTNAME_SIZE_MESSAGE);
         }
         Pattern pattern = Pattern.compile(NAME_PATTERN);
         Matcher matcher = pattern.matcher(lastName);
         if (!matcher.find()) {
-            throw new IllegalArgumentException(NAME_PATTERN_MESSAGE);
+            throw new IllegalArgumentException(LASTNAME_PATTERN_MESSAGE);
         }
     }
 
     private static void validatePatronymic(String patronymic) {
         int length = patronymic.length();
-        if (length < MIN_NAME_SIZE || length > MAX_PATRONYMIC_SIZE) {
-            throw new IllegalArgumentException(NAME_SIZE_MESSAGE);
+        if (length > MAX_PATRONYMIC_SIZE) {
+            throw new IllegalArgumentException(PATRONYMIC_SIZE_MESSAGE);
         }
         Pattern pattern = Pattern.compile(NAME_PATTERN);
         Matcher matcher = pattern.matcher(patronymic);
         if (!matcher.find()) {
-            throw new IllegalArgumentException(NAME_PATTERN_MESSAGE);
+            throw new IllegalArgumentException(PATRONYMIC_PATTERN_MESSAGE);
         }
     }
 

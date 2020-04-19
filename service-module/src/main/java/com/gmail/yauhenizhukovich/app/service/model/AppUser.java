@@ -10,12 +10,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class AppUser implements UserDetails {
 
+    public static final String ROLE_PREFIX = "ROLE_";
     private final UserDTO user;
     private final List<SimpleGrantedAuthority> authorities;
 
     public AppUser(UserDTO user) {
         this.user = user;
-        this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        this.authorities = Collections.singletonList(new SimpleGrantedAuthority(ROLE_PREFIX + user.getRole().name()));
     }
 
     @Override

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Article</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-4 text-center" th:text="${article.title}"><strong>USER</strong></h1>
+<dl class="row">
+
+    <dt class="col-sm-3">Title:</dt>
+    <dd class="col-sm-9" th:text="${article.title}">Not defined</dd>
+
+    <dt class="col-sm-3">Date:</dt>
+    <dd class="col-sm-9" th:text="${article.date}">Not defined</dd>
+
+    <dt class="col-sm-3">Author:</dt>
+    <dd class="col-sm-9" th:text="${article.authorFirstName + ' ' + article.authorLastName}">Not defined</dd>
+
+    <dt class="col-sm-3">Content:</dt>
+    <dd class="col-sm-9" th:text="${article.content}">Not defined</dd>
+</dl>
+<div th:unless="${#lists.isEmpty(article.comments)}">
+    <div th:each="comment : ${article.comments}">
+        <div th:text="${comment.date}"/>
+        <div th:text="${comment.authorLastName + ' ' + comment.authorFirstName}"/>
+        <div th:text="${comment.content}"/>
+    </div>
+</div>
+<div th:if="${#lists.isEmpty(article.comments)}">
+    There are no comments...
+</div>
+<a href="#" th:href="@{/articles}" class="btn btn-primary" role="button">Back to articles</a>
+<a href="#" th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

@@ -17,8 +17,8 @@ public class EmailUtil {
 
     private static final Logger logger = LogManager.getLogger(MethodHandles.lookup().lookupClass());
     private static final String SEND_FROM_SMTP = "smtp.gmail.com";
-    private static final String SEND_FROM_EMAIL = "supersonicleader@gmail.com";
-    private static final String SEND_FROM_PASSWORD = "327lives";
+    private static final String SEND_FROM_EMAIL = "enter_your_email@gmail.com";
+    private static final String SEND_FROM_PASSWORD = "enter_your_password";
     private static final String MESSAGE_TITLE = "Check out to get access to our online store!";
     private static final String MESSAGE_TEXT = "This is your password. Use it on the login page to access our resources: ";
 

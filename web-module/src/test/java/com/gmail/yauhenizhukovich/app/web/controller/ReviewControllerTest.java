@@ -1,18 +1,26 @@
 package com.gmail.yauhenizhukovich.app.web.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.gmail.yauhenizhukovich.app.service.ReviewService;
+import com.gmail.yauhenizhukovich.app.service.model.ReviewDTO;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -22,70 +30,113 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser(roles = "ADMINISTRATOR")
 class ReviewControllerTest {
 
+    private static final int PAGE = 3;
+    private static final String VALID_FULL_NAME = "Sidorov Ivan Petrovich";
+    private static final String VALID_REVIEW_TEXT = "This is test review example.";
+    private static final LocalDate VALID_DATE = LocalDate.now();
+    private static final boolean VALID_ACTIVE = true;
+    private static final long VALID_ID = 12L;
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
     @MockBean
     private ReviewService reviewService;
     @MockBean
     private UserDetailsService userDetailsService;
 
     @Test
-    void getAllReviews_returnRedirectedUrl() throws Exception {
-        mockMvc.perform(get("/reviews")).
-                andExpect(redirectedUrl("/reviews/page/1"));
+    void getReviews_returnStatusOk() throws Exception {
+        mockMvc.perform(get("/reviews")).andExpect(status().isOk());
     }
 
     @Test
-    void getReviewsByPage_returnStatusOk() throws Exception {
-        mockMvc.perform(get("/reviews/page/21")).
-                andExpect(status().isOk());
+    void getReviewsWithParam_returnStatusOk() throws Exception {
+        mockMvc.perform(get("/reviews")
+                .contentType(MediaType.TEXT_HTML)
+                .param("page", String.valueOf(PAGE))).andExpect(status().isOk());
     }
 
     @Test
-    void getReviewsByPage_callBusinessLogic() throws Exception {
-        mockMvc.perform(get("/reviews/page/24")).
-                andExpect(status().isOk());
-        verify(reviewService, times(1)).getReviewsByPage(eq(24));
+    void getReviewsWithInvalidParam_returnBadRequest() throws Exception {
+        mockMvc.perform(get("/reviews")
+                .contentType(MediaType.TEXT_HTML)
+                .param("page", "d")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getReviews_callBusinessLogic() throws Exception {
+        mockMvc.perform(get("/reviews")
+                .contentType(MediaType.TEXT_HTML)
+                .param("page", String.valueOf(PAGE))).andExpect(status().isOk());
+        verify(reviewService, times(1)).getPages();
+        verify(reviewService, times(1)).getReviewsByPage(eq(PAGE));
+    }
+
+    @Test
+    void getReviews_returnReviews() throws Exception {
+        List<ReviewDTO> reviews = getOneReviewList();
+        when(reviewService.getReviewsByPage(PAGE)).thenReturn(reviews);
+        MvcResult result = mockMvc.perform(get("/reviews")
+                .contentType(MediaType.TEXT_HTML)
+                .param("page", String.valueOf(PAGE))).andReturn();
+        String actualContent = result.getResponse().getContentAsString();
+        Assertions.assertThat(actualContent).contains(VALID_FULL_NAME);
+        Assertions.assertThat(actualContent).contains(VALID_REVIEW_TEXT);
+        Assertions.assertThat(actualContent).contains(VALID_DATE.toString());
+    }
+
+    @Test
+    void updateReviews_returnRedirectedUrl() throws Exception {
+        mockMvc.perform(post("/reviews")
+                .param("ids", "2")
+                .param("ids", "4")
+        ).andExpect(redirectedUrl("/reviews"));
+    }
+
+    @Test
+    void updateReviewsWithInvalidParams_returnBadRequest() throws Exception {
+        mockMvc.perform(post("/reviews")
+                .param("ids", "2")
+                .param("ids", "g")
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateReviews_callBusinessLogic() throws Exception {
+        Long[] ids = new Long[] {2L, 5L};
+        mockMvc.perform(post("/reviews")
+                .param("ids", String.valueOf(ids[0]))
+                .param("ids", String.valueOf(ids[1]))
+        ).andExpect(redirectedUrl("/reviews"));
+        verify(reviewService, times(1)).updateActivityByIds(eq(ids));
     }
 
     @Test
     void deleteReviewById_returnRedirectedUrl() throws Exception {
-        mockMvc.perform(
-                get("/reviews/20/delete").
-                        param("pageNumber", "2")
-        ).andExpect(redirectedUrl("/reviews/page/2"));
+        mockMvc.perform(post("/reviews/{id}", "12"))
+                .andExpect(redirectedUrl("/reviews"));
     }
 
     @Test
     void deleteReviewById_callBusinessLogic() throws Exception {
-        mockMvc.perform(
-                get("/reviews/21/delete").
-                        param("pageNumber", "2")
-        ).andExpect(redirectedUrl("/reviews/page/2"));
-        verify(reviewService, times(1)).deleteReviewById(eq(21L));
+        mockMvc.perform(post("/reviews/{id}", VALID_ID))
+                .andExpect(redirectedUrl("/reviews"));
+        verify(reviewService, times(1)).deleteReviewById(eq(VALID_ID));
     }
 
-    @Test
-    void updateReviewsActivity_returnRedirectedUrl() throws Exception {
-        mockMvc.perform(
-                post("/reviews/update/active")
-                        .param("ids", "1")
-                        .param("ids", "4")
-                        .param("pageNumber", "2"))
-                .andExpect(redirectedUrl("/reviews/page/2"));
+    private List<ReviewDTO> getOneReviewList() {
+        List<ReviewDTO> reviews = new ArrayList<>();
+        ReviewDTO review = getReview();
+        reviews.add(review);
+        return reviews;
     }
 
-    @Test
-    void updateReviewsActivity_callBusinessLogic() throws Exception {
-        mockMvc.perform(
-                post("/reviews/update/active")
-                        .param("ids", "1")
-                        .param("ids", "4")
-                        .param("pageNumber", "2"))
-                .andExpect(redirectedUrl("/reviews/page/2"));
-        verify(reviewService, times(1)).updateActivityByIds(eq(new Long[] {1L, 4L}));
+    private ReviewDTO getReview() {
+        ReviewDTO review = new ReviewDTO();
+        review.setFullName(VALID_FULL_NAME);
+        review.setReviewText(VALID_REVIEW_TEXT);
+        review.setDate(VALID_DATE);
+        review.setActive(VALID_ACTIVE);
+        return review;
     }
 
 }
