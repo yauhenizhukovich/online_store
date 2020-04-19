@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Users</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-4 text-center"><strong>USERS</strong></h1>
+<div class="col" th:if="${not #lists.isEmpty(users)}">
+    <form action="#" th:action="@{/users/delete(pageNumber=${pageNumber})}" method="post">
+        <table class="table table-bordered text-center">
+            <thead>
+            <tr>
+                <td></td>
+                <td scope="col">#</td>
+                <td scope="col">Full name</td>
+                <td scope="col">Email</td>
+                <td scope="col">Role</td>
+                <td></td>
+                <td></td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user, status : ${users}">
+                <td>
+                    <input type="checkbox" name="uniqueNumbers" th:value="${user.uniqueNumber}"/>
+                </td>
+                <td th:text="${status.count}"></td>
+                <td th:text="${user.lastName + ' ' + user.firstName + ' ' + user.patronymic}">Name not defined</td>
+                <td th:text="${user.email}">Email not defined</td>
+                <td th:text="${#strings.replace(user.role,'_',' ').toUpperCase()}">Role not defined</td>
+                <td>
+                    <a th:href="@{/users/{uniqueNumber}/update/password(uniqueNumber=${user.uniqueNumber}, pageNumber=${pageNumber})}"
+                       class="btn btn-secondary"
+                       role="button">Generate
+                        new password</a>
+                </td>
+                <td>
+                    <div th:unless="${#strings.equals(param.uniqueNumber, user.uniqueNumber)}">
+                        <a th:href="@{/users/page/{pageNumber}(uniqueNumber=${user.uniqueNumber}, pageNumber=${pageNumber})}"
+                           class="btn btn-secondary"
+                           role="button">Change
+                            role</a>
+                    </div>
+                    <div th:if="${#strings.equals(param.uniqueNumber, user.uniqueNumber)}">
+                        Set role:
+                        <select name="userRole">
+                            <option th:each="role : ${roles}" th:text="${#strings.replace(role,'_',' ').toLowerCase()}" th:value="${role}">
+                                Role
+                            </option>
+                        </select>
+                        <input type="submit"
+                               th:formaction="@{/users/{uniqueNumber}/update/role(uniqueNumber=${user.uniqueNumber}, pageNumber=${pageNumber})}"
+                               th:formmethod="post" value="Change role" class="btn btn-secondary">
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.size(pages) gt 1}" class="text-center">
+            Pages<br>
+            <div class="btn-group mr-2 text-center" role="group">
+                <div th:each="page : ${pages}">
+                    <a th:href="@{/reviews/page/{pageNumber}(pageNumber=${page})}" th:text="${page}" th:value="${page}"
+                       class="btn btn-secondary"
+                       role="button">Page Number</a>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div th:if="${param.error}">
+            <div class="alert alert-warning" th:text="${param.error}">
+            </div>
+        </div>
+        <div th:if="${param.message}">
+            <div class="alert alert-success" th:text="${param.message}">
+            </div>
+        </div>
+        <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+        <input type="submit" class="btn btn-primary" value="Delete checked users"/>
+        <a th:href="@{/users/add}" class="btn btn-primary" role="button">Add user</a>
+    </form>
+</div>
+<div class="lead text-center" th:unless="${not #lists.isEmpty(users)}">
+    <p>There are no users...</p>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

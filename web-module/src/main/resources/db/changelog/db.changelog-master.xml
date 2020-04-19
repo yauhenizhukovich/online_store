@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="1" author="yauhenizhukovich@gmail.com">
+        <createTable tableName="user">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="unique_number" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="CHAR(60)"/>
+            <column name="role" type="VARCHAR(40)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="yauhenizhukovich@gmail.com">
+        <createTable tableName="user_details">
+            <column name="user_id" type="BIGINT">
+                <constraints foreignKeyName="user_id" references="user(id)" nullable="false" primaryKey="true"/>
+            </column>
+            <column name="last_name" type="VARCHAR(40)"/>
+            <column name="first_name" type="VARCHAR(20)"/>
+            <column name="patronymic" type="VARCHAR(40)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="3" author="yauhenizhukovich@gmail.com">
+        <insert tableName="user">
+            <column name="unique_number" value="aaaaaaaaaaaaaaaaaaaaaaa"/>
+            <column name="email" value="admin@gmail.com"/>
+            <column name="password" value="$2y$12$wkYgl.0TMyFPh4YhiqJDUO0G2m6DAjosMRQ7VD9YQpbbErmAwYuSa"/>
+            <column name="role" value="ADMINISTRATOR"/>
+        </insert>
+        <insert tableName="user_details">
+            <column name="user_id" valueComputed="(SELECT id FROM user WHERE email = 'admin@gmail.com')"/>
+            <column name="last_name" value="name"/>
+            <column name="first_name" value="name"/>
+            <column name="patronymic" value="name"/>
+        </insert>
+    </changeSet>
+    <changeSet id="4" author="yauhenizhukovich@gmail.com">
+        <createTable tableName="review">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="full_name" type="VARCHAR(60)"/>
+            <column name="review_text" type="VARCHAR(100)"/>
+            <column name="date" type="DATE"/>
+            <column name="active" type="TINYINT"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

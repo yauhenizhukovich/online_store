@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-3 text-center"><strong>LOG IN</strong></h1>
+<div class="container">
+    <div class="row">
+        <div class="col-sm">
+        </div>
+        <div class="col-sm">
+            <form action="#" th:action="@{/users/login}" method="post">
+                <fieldset>
+                    <div class="form-group">
+                        <label for="inputEmail">Email address</label>
+                        <input value="admin@gmail.com" type="email" name="username" class="form-control" id="inputEmail" aria-describedby="emailHelp">
+                        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword">Password</label>
+                        <input value="admin" type="password" name="password" class="form-control" id="inputPassword">
+                    </div>
+                    <div th:if="${param.error}">
+                        <div class="alert alert-info">
+                            Invalid username or password.
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Log in</button>
+                    <br><br>
+                    <a th:href="@{/}" class="btn btn-success" role="button">Back to start page</a>
+                </fieldset>
+            </form>
+        </div>
+        <div class="col-sm">
+        </div>
+    </div>
+</div>
+</body>
+</html>
