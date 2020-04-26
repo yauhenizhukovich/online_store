@@ -1,5 +1,6 @@
 package com.gmail.yauhenizhukovich.app.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -13,12 +14,15 @@ import com.gmail.yauhenizhukovich.app.service.UserService;
 import com.gmail.yauhenizhukovich.app.service.exception.AdministratorChangingException;
 import com.gmail.yauhenizhukovich.app.service.exception.AnonymousUserException;
 import com.gmail.yauhenizhukovich.app.service.exception.UserExistenceException;
-import com.gmail.yauhenizhukovich.app.service.model.RoleEnumService;
-import com.gmail.yauhenizhukovich.app.service.model.UserDTO;
-import com.gmail.yauhenizhukovich.app.service.util.EmailUtil;
-import com.gmail.yauhenizhukovich.app.service.util.PaginationUtil;
+import com.gmail.yauhenizhukovich.app.service.model.user.AddUserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.LoginUserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.RoleEnumService;
+import com.gmail.yauhenizhukovich.app.service.model.user.UpdateUserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.UpdateUserProfileDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.UserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.UserProfileDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.UsersDTO;
 import com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil;
-import com.gmail.yauhenizhukovich.app.service.util.ValidationUtil;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -27,8 +31,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.COUNT_OF_USERS_BY_PAGE;
+import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getCountOfPagesByCountOfObjects;
+import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getStartPositionByPageNumber;
+import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDTOToDatabaseObject;
+import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDatabaseObjectToDTOToLogin;
+import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDatabaseObjectToUserDTO;
+import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDatabaseObjectToUserProfileDTO;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
@@ -40,147 +51,131 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public UserDTO getUserByEmail(String email) {
-        ValidationUtil.validateEmail(email);
+    public LoginUserDTO getUserByEmail(String email) {
         User user = userRepository.getUserByEmail(email);
-        return UserConversionUtil.convertDatabaseObjectToDTOToLogin(user);
+        if (user == null) {
+            return null;
+        }
+        return convertDatabaseObjectToDTOToLogin(user);
     }
 
     @Override
-    @Transactional
-    public List<UserDTO> getUsersByPage(int page) {
-        int startPosition = PaginationUtil.getStartPositionByPageNumber(page, COUNT_OF_USERS_BY_PAGE);
+    public List<UsersDTO> getUsersByPage(int page) {
+        int startPosition = getStartPositionByPageNumber(page, COUNT_OF_USERS_BY_PAGE);
         List<User> users = userRepository.getObjectsByStartPositionAndMaxResult(startPosition, COUNT_OF_USERS_BY_PAGE);
         return users.stream()
-                .map(UserConversionUtil::convertDatabaseObjectToDTO)
+                .map(UserConversionUtil::convertDatabaseObjectToUsersDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional
-    public List<Integer> getPages() {
+    public int getCountOfPages() {
         Long countOfUsers = userRepository.getCountOfObjects();
-        return PaginationUtil.getCountOfPages(countOfUsers, COUNT_OF_USERS_BY_PAGE);
+        return getCountOfPagesByCountOfObjects(countOfUsers, COUNT_OF_USERS_BY_PAGE);
     }
 
     @Override
-    @Transactional
-    public UserDTO addUser(UserDTO userDTO) throws UserExistenceException {
-        ValidationUtil.validateUser(userDTO);
-        if (userRepository.getUserByEmail(userDTO.getEmail()) != null) {
-            throw new UserExistenceException("User with this email already exists.");
+    public UserDTO addUser(AddUserDTO userDTO) throws UserExistenceException {
+        String email = userDTO.getEmail();
+        if (userRepository.getUserByEmail(email) != null) {
+            throw new UserExistenceException("UserExistenceException");     // TODO
         }
-        User user = UserConversionUtil.convertDTOToDatabaseObject(userDTO);
-        setUUID(user);
+        User user = convertDTOToDatabaseObject(userDTO);
+        UUID uniqueNumber = UUID.randomUUID();
+        user.setUniqueNumber(uniqueNumber.toString());
         setPasswordAndSendToEmail(user);
         user = userRepository.add(user);
-        return UserConversionUtil.convertDatabaseObjectToDTO(user);
+        return convertDatabaseObjectToUserDTO(user);
     }
 
     @Override
-    @Transactional
     public UserDTO getUserByUniqueNumber(String uniqueNumber) {
         User user = userRepository.getUserByUniqueNumber(uniqueNumber);
-        return UserConversionUtil.convertDatabaseObjectToDTO(user);
-    }
-
-    @Override
-    @Transactional
-    public UserDTO updatePasswordByUniqueNumber(String uniqueNumber) {
-        User user = userRepository.getUserByUniqueNumber(uniqueNumber);
-        setPasswordAndSendToEmail(user);
-        return UserConversionUtil.convertDatabaseObjectToDTO(user);
-    }
-
-    @Override
-    @Transactional
-    public UserDTO updateRoleByUniqueNumber(RoleEnumService serviceRole, String uniqueNumber) throws AdministratorChangingException {
-        User user = userRepository.getUserByUniqueNumber(uniqueNumber);
-        RoleEnumRepository actualRole = user.getRole();
-        if (actualRole.equals(RoleEnumRepository.ADMINISTRATOR)) {
-            int countOfAdministrators = getCountOfAdministrators();
-            if (countOfAdministrators == 1) {
-                throw new AdministratorChangingException("You should have at least one administrator!");
-            }
+        if (user == null) {
+            return null;
         }
-        RoleEnumRepository role = RoleEnumRepository.valueOf(serviceRole.name());
-        if (!role.equals(actualRole)) {
-            user.setRole(role);
-        }
-        return UserConversionUtil.convertDatabaseObjectToDTO(user);
+        return convertDatabaseObjectToUserDTO(user);
     }
 
     @Override
-    @Transactional
     public boolean deleteUsersByUniqueNumber(List<String> uniqueNumbers) throws AdministratorChangingException {
         int countOfDatabaseAdministrators = getCountOfDatabaseAdministrators();
-        return deleteUsers(uniqueNumbers, countOfDatabaseAdministrators);
-    }
-
-    @Override
-    @Transactional
-    public UserDTO getUserProfile() throws AnonymousUserException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        if (email.equals("anonymousUser")) {
-            throw new AnonymousUserException("You should log in to see your profile.");
+        int countOfAdministratorsToDelete = 0;
+        List<User> usersToDelete = new ArrayList<>();
+        for (String uniqueNumber : uniqueNumbers) {
+            User user = userRepository.getUserByUniqueNumber(uniqueNumber);
+            if (user.getRole() == RoleEnumRepository.ADMINISTRATOR) {
+                countOfAdministratorsToDelete++;
+                if (countOfDatabaseAdministrators == countOfAdministratorsToDelete) {
+                    throw new AdministratorChangingException("exc");
+                }
+            }
+            usersToDelete.add(user);
         }
-        User user = userRepository.getUserByEmail(email);
-        return UserConversionUtil.convertDatabaseObjectToDTO(user);
+        usersToDelete.forEach(userRepository::delete);
+        return true;
     }
 
     @Override
-    @Transactional
-    public UserDTO updateUserDetails(UserDTO userDTO) {
-        User user = userRepository.getUserByEmail(userDTO.getEmail());
+    public UserDTO updateUser(UpdateUserDTO updatedUser) throws AdministratorChangingException {
+        User user = userRepository.getUserByUniqueNumber(updatedUser.getUniqueNumber());
+        if (updatedUser.isUpdatePassword()) {
+            setPasswordAndSendToEmail(user);
+        }
+        if (user.getRole() == RoleEnumRepository.ADMINISTRATOR) {
+            if (updatedUser.getRole() != RoleEnumService.ADMINISTRATOR) {
+                int countOfAdministrators = getCountOfDatabaseAdministrators();
+                if (countOfAdministrators == 1) {
+                    throw new AdministratorChangingException("AdministratorChangingException");    //  TODO
+                }
+            }
+        }
+        RoleEnumRepository updatedRole = RoleEnumRepository.valueOf(updatedUser.getRole().name());
+        if (updatedRole != user.getRole()) {
+            user.setRole(updatedRole);
+        }
+        return convertDatabaseObjectToUserDTO(user);
+    }
+
+    @Override
+    public UserProfileDTO getUserProfile() throws AnonymousUserException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getName().equals("anonymousUser")) {
+            throw new AnonymousUserException("AnonymousUserException");    // TODO
+        }
+        User user = userRepository.getUserByEmail(authentication.getName());
+        return convertDatabaseObjectToUserProfileDTO(user);
+    }
+
+    @Override
+    public UserProfileDTO updateUserProfile(UpdateUserProfileDTO userDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.getUserByEmail(authentication.getName());
         UserDetails userDetails = user.getUserDetails();
-        userDetails.setLastName(userDTO.getLastName());
+        setUserDetails(userDTO, userDetails);
+        if (userDTO.getUpdatePassword()) {
+            setPasswordAndSendToEmail(user);
+        }
+        return convertDatabaseObjectToUserProfileDTO(user);
+    }
+
+    private void setUserDetails(UpdateUserProfileDTO userDTO, UserDetails userDetails) {
         userDetails.setFirstName(userDTO.getFirstName());
+        userDetails.setLastName(userDTO.getLastName());
         userDetails.setAddress(userDTO.getAddress());
         userDetails.setTelephone(userDTO.getTelephone());
-        return UserConversionUtil.convertDatabaseObjectToDTO(user);
-    }
-
-    private void setUUID(User user) {
-        UUID uniqueNumberUUID = UUID.randomUUID();
-        String uniqueNumber = uniqueNumberUUID.toString();
-        user.setUniqueNumber(uniqueNumber);
     }
 
     private void setPasswordAndSendToEmail(User user) {
         String password = RandomString.make();
         String encodedPassword = passwordEncoder.encode(password);
         user.setPassword(encodedPassword);
-        String email = user.getEmail();
-        EmailUtil.sendPassword(email, password);
+        //        EmailUtil.sendPassword(user.getEmail(), password);            TODO
     }
 
     private int getCountOfDatabaseAdministrators() {
         Long countOfDatabaseAdministratorsLong = userRepository.getCountOfUsersByRole(RoleEnumRepository.ADMINISTRATOR);
         return Math.toIntExact(countOfDatabaseAdministratorsLong);
-    }
-
-    private boolean deleteUsers(List<String> uniqueNumbers, int countOfDatabaseAdministrators) throws
-            AdministratorChangingException {
-        int countOfAdministratorsToDelete = 0;
-        for (String uniqueNumber : uniqueNumbers) {
-            User user = userRepository.getUserByUniqueNumber(uniqueNumber);
-            RoleEnumRepository role = user.getRole();
-            if (role.equals(RoleEnumRepository.ADMINISTRATOR)) {
-                countOfAdministratorsToDelete++;
-                if (countOfDatabaseAdministrators == countOfAdministratorsToDelete) {
-                    throw new AdministratorChangingException("You can't delete all administrators!");
-                }
-            }
-            userRepository.delete(user);
-        }
-        return true;
-    }
-
-    private int getCountOfAdministrators() {
-        Long countOfAdministratorsLong = userRepository.getCountOfUsersByRole(RoleEnumRepository.ADMINISTRATOR);
-        return Math.toIntExact(countOfAdministratorsLong);
     }
 
 }

@@ -9,10 +9,10 @@ public interface UserValidationMessages {
 
     String NOT_EMPTY_FIRSTNAME_MESSAGE = "First name cannot be empty.";
     String NOT_EMPTY_LASTNAME_MESSAGE = "Last name cannot be empty.";
-    String NOT_NULL_PATRONYMIC_MESSAGE = "Patronymic cannot be null.";
+    String NOT_EMPTY_PATRONYMIC_MESSAGE = "Patronymic cannot be empty.";
     String FIRSTNAME_SIZE_MESSAGE = "First name length should be from " + MIN_NAME_SIZE + " to " + MAX_FIRSTNAME_SIZE + ".";
     String LASTNAME_SIZE_MESSAGE = "Last name length should be from " + MIN_NAME_SIZE + " to " + MAX_LASTNAME_SIZE + ".";
-    String PATRONYMIC_SIZE_MESSAGE = "Patronymic length should be less than " + MAX_PATRONYMIC_SIZE + ".";
+    String PATRONYMIC_SIZE_MESSAGE = "Patronymic length should be from " + MIN_NAME_SIZE + " to " + MAX_PATRONYMIC_SIZE + ".";
     String FIRSTNAME_PATTERN_MESSAGE = "First name can contain only letters.";
     String LASTNAME_PATTERN_MESSAGE = "Last name can contain only letters.";
     String PATRONYMIC_PATTERN_MESSAGE = "Patronymic can contain only letters.";

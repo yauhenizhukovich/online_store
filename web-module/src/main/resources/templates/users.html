@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
 </head>
 <body>
-<h1 class="display-4 text-center"><strong>USERS</strong></h1>
+<h1 class="display-4 text-center font-italic"><strong>USERS</strong></h1>
 <div class="col" th:if="${not #lists.isEmpty(users)}">
     <form action="#" th:action="@{/users/delete}" method="post">
         <table class="table table-bordered text-center">
@@ -23,44 +23,44 @@
             </thead>
             <tbody>
             <tr th:each="user, status : ${users}">
-                <td>
-                    <input type="checkbox" name="uniqueNumbers" th:value="${user.uniqueNumber}"/>
-                </td>
-                <td th:text="${status.count}"/>
-                <td th:text="${user.lastName + ' ' + user.firstName + ' ' + user.patronymic}">Name not defined</td>
-                <td th:text="${user.email}">Email not defined</td>
-                <td th:value="${user.role}" th:text="${#strings.replace(user.role,'_',' ').toUpperCase()}">
-                    Role not defined
-                </td>
-                <td>
-                    <a th:href="@{/users/{uniqueNumber}(uniqueNumber=${user.uniqueNumber})}"
-                       class="btn btn-primary" role="button">Edit user data</a>
-                </td>
+                <div th:object="${user}">
+                    <td>
+                        <input type="checkbox" name="uniqueNumbers" th:value="*{uniqueNumber}"/>
+                    </td>
+                    <td th:text="${status.count}"/>
+                    <td th:text="*{lastName + ' ' + firstName + ' ' + patronymic}">Name not defined</td>
+                    <td th:text="*{email}">Email not defined</td>
+                    <td th:value="*{role}" th:text="${#strings.replace(user.role,'_',' ').toUpperCase()}">
+                        Role not defined
+                    </td>
+                    <td>
+                        <a th:href="@{/users/{uniqueNumber}(uniqueNumber=${user.uniqueNumber})}"
+                           class="btn btn-primary" role="button">Edit user data</a>
+                    </td>
+                </div>
             </tr>
             </tbody>
         </table>
-        <div class="alert alert-info" th:if="${param.message}" th:text="${param.message}">
+        <div class="alert alert-danger" th:if="${param.message}" th:text="${param.message}">
         </div>
-        <div th:if="${#lists.size(pages) gt 1}" class="text-center">
-            Pages<br>
-            <div class="btn-group mr-2 text-center" role="group">
-                <div th:each="page : ${pages}">
-                    <a th:name="'page' + ${page}" th:href="@{/users(page=${page})}" th:text="${page}"
-                       th:value="${page}"
-                       class="btn btn-secondary"
-                       role="button">Page</a>
-                </div>
-            </div>
-        </div>
+        <nav th:if="${pages gt 1}">
+            <ul class="pagination justify-content-center">
+                <li th:each="page: ${#numbers.sequence(1, pages)}" class="page-item active">
+                    <a class="page-link" th:name="'page' + ${page}" th:href="@{/users(page=${page})}" th:text="${page}"
+                       th:value="${page}"/>
+                </li>
+            </ul>
+        </nav>
         <br>
         <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
-        <input type="submit" class="btn btn-primary" value="Delete checked users"/>
-        <a th:href="@{/users/add}" class="btn btn-primary" role="button">Add user</a>
+        <a th:href="@{/users/add}" class="btn btn-primary" role="button">Add new user</a>
+        <input type="submit" class="btn btn-danger" value="Delete checked users"/>
     </form>
 </div>
 <div class="lead text-center" th:unless="${not #lists.isEmpty(users)}">
     <p>There are no users...</p>
     <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    <a th:href="@{/users/add}" class="btn btn-primary" role="button">Add new user</a>
 </div>
 <script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>

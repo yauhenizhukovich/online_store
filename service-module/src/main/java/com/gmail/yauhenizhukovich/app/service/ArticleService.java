@@ -4,20 +4,27 @@ import java.util.List;
 
 import com.gmail.yauhenizhukovich.app.service.exception.AnonymousUserException;
 import com.gmail.yauhenizhukovich.app.service.exception.UserAccessDeniedException;
-import com.gmail.yauhenizhukovich.app.service.model.ArticleDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.UpdateArticleDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.AddArticleDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.ArticleDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.ArticlesDTO;
 
 public interface ArticleService {
 
-    List<Integer> getPages();
+    List<ArticlesDTO> getArticlesByPage(Integer pageNumber);
 
-    List<ArticleDTO> getArticlesByPage(Integer pageNumber);
+    int getCountOfPages();
 
     ArticleDTO getArticleById(Long id);
 
-    List<ArticleDTO> getAllArticles();
+    List<ArticlesDTO> getAllArticles();
 
-    void deleteArticleById(Long id);
+    boolean deleteArticleById(Long id);
 
-    ArticleDTO addArticle(ArticleDTO article) throws AnonymousUserException, UserAccessDeniedException;
+    ArticleDTO addArticle(AddArticleDTO article) throws AnonymousUserException, UserAccessDeniedException;
+
+    ArticleDTO updateArticle(UpdateArticleDTO updatedArticle);
+
+    boolean deleteCommentByArticleIdAndCommentId(Long articleId, Long commentId);
 
 }

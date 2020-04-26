@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add article</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-sm">
+            <h1 class="display-3 text-center font-italic"><strong>ADD ARTICLE</strong></h1>
+        </div>
+        <div class="col-sm"></div>
+        <div class="col-sm"></div>
+    </div>
+</div>
+<div class="container" th:object="${article}">
+    <div class="row">
+        <div class="col-sm">
+            <form action="#" th:action="@{/articles}" method="post">
+                <div th:if="${article ne null}" th:name="Article_model"></div>
+
+                <div class="form-group">
+                    <label for="dateInput" class="font-weight-normal">Date</label>
+                    <input type="date" class="form-control" name="date"
+                           th:value="*{date}" id="dateInput">
+                </div>
+
+                <div class="form-group">
+                    <label for="titleInput" class="font-weight-normal">Title</label>
+                    <input type="text" minlength="1" maxlength="40" pattern="^[a-zA-Z0-9 -]+$" name="title"
+                           th:value="*{title}" id="titleInput">
+                </div>
+
+                <div class="form-group">
+                    <label for="contentInput" class="font-weight-normal">Content</label>
+                    <input type="text" minlength="2" maxlength="1000" name="content"
+                           th:value="*{content}" id="contentInput">
+                </div>
+                <input type="submit" class="btn btn-success" value="Add article"/>
+                <a th:href="@{/articles}" class="btn btn-primary" role="button">Back to articles</a>
+            </form>
+        </div>
+        <div class="col-sm">
+            <div class="alert alert-warning text-center" th:if="${param.error}" th:text="${param.error}"/>
+            <div class="alert alert-warning text-center" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"/>
+            <div class="alert alert-warning text-center" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"/>
+            <div class="alert alert-warning text-center" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"/>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -5,23 +5,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.gmail.yauhenizhukovich.app.repository.model.Article;
-import com.gmail.yauhenizhukovich.app.repository.model.ArticleDetails;
 import com.gmail.yauhenizhukovich.app.repository.model.Comment;
 import com.gmail.yauhenizhukovich.app.repository.model.User;
 import com.gmail.yauhenizhukovich.app.repository.model.UserDetails;
-import com.gmail.yauhenizhukovich.app.service.model.ArticleDTO;
-import com.gmail.yauhenizhukovich.app.service.model.CommentDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.AddArticleDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.ArticleDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.ArticlesDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.CommentDTO;
 
 public class ArticleConversionUtil {
 
-    public static ArticleDTO convertDatabaseObjectToDTO(Article article) {
+    public static ArticlesDTO convertDatabaseObjectToArticlesDTO(Article article) {
+        ArticlesDTO articleDTO = new ArticlesDTO();
+        articleDTO.setId(article.getId());
+        articleDTO.setDate(article.getDate());
+        articleDTO.setTitle(article.getTitle());
+        articleDTO.setAuthorFirstName(article.getAuthor().getUserDetails().getFirstName());
+        articleDTO.setAuthorLastName(article.getAuthor().getUserDetails().getLastName());
+        return articleDTO;
+    }
+
+    public static ArticleDTO convertDatabaseObjectToArticleDTO(Article article) {
         ArticleDTO articleDTO = new ArticleDTO();
         articleDTO.setId(article.getId());
         articleDTO.setDate(article.getDate());
         articleDTO.setTitle(article.getTitle());
-        articleDTO.setRundown(article.getRundown());
-        ArticleDetails articleDetails = article.getArticleDetails();
-        articleDTO.setContent(articleDetails.getContent());
+        articleDTO.setContent(article.getContent());
         User author = article.getAuthor();
         UserDetails authorDetails = author.getUserDetails();
         articleDTO.setAuthorFirstName(authorDetails.getFirstName());
@@ -29,7 +38,7 @@ public class ArticleConversionUtil {
         List<Comment> comments = article.getComments();
         if (comments != null) {
             List<CommentDTO> commentsDTO = comments.stream()
-                    .map(ArticleConversionUtil::getCommentDTO)
+                    .map(ArticleConversionUtil::convertDatabaseCommentToCommentDTO)
                     .sorted(Comparator.comparing(CommentDTO::getDate)
                             .reversed())
                     .collect(Collectors.toList());
@@ -38,19 +47,17 @@ public class ArticleConversionUtil {
         return articleDTO;
     }
 
-    public static Article convertDTOToDatabaseObject(ArticleDTO articleDTO) {
+    public static Article convertDTOToDatabaseObject(AddArticleDTO articleDTO) {
         Article article = new Article();
+        article.setDate(articleDTO.getDate());
         article.setTitle(articleDTO.getTitle());
-        article.setRundown(articleDTO.getRundown());
-        ArticleDetails articleDetails = new ArticleDetails();
-        articleDetails.setArticle(article);
-        articleDetails.setContent(articleDTO.getContent());
-        article.setArticleDetails(articleDetails);
+        article.setContent(articleDTO.getContent());
         return article;
     }
 
-    private static CommentDTO getCommentDTO(Comment comment) {
+    private static CommentDTO convertDatabaseCommentToCommentDTO(Comment comment) {
         CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setId(comment.getId());
         User author = comment.getAuthor();
         UserDetails userDetails = author.getUserDetails();
         commentDTO.setAuthorFirstName(userDetails.getFirstName());

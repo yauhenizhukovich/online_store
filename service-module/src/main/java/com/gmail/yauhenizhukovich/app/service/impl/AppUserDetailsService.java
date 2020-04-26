@@ -3,8 +3,8 @@ package com.gmail.yauhenizhukovich.app.service.impl;
 import java.lang.invoke.MethodHandles;
 
 import com.gmail.yauhenizhukovich.app.service.UserService;
-import com.gmail.yauhenizhukovich.app.service.model.AppUser;
-import com.gmail.yauhenizhukovich.app.service.model.UserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.AppUser;
+import com.gmail.yauhenizhukovich.app.service.model.user.LoginUserDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,7 +22,7 @@ public class AppUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserDTO user = userService.getUserByEmail(email);
+        LoginUserDTO user = userService.getUserByEmail(email);
         if (user == null) {
             logger.info("User '" + email + "' was not found");
             throw new UsernameNotFoundException("User '" + email + "' was not found");

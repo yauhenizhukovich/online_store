@@ -2,7 +2,7 @@ package com.gmail.yauhenizhukovich.app.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 import com.gmail.yauhenizhukovich.app.repository.UserRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.RoleEnumRepository;
@@ -11,10 +11,12 @@ import com.gmail.yauhenizhukovich.app.repository.model.UserDetails;
 import com.gmail.yauhenizhukovich.app.service.exception.AdministratorChangingException;
 import com.gmail.yauhenizhukovich.app.service.exception.UserExistenceException;
 import com.gmail.yauhenizhukovich.app.service.impl.UserServiceImpl;
-import com.gmail.yauhenizhukovich.app.service.model.RoleEnumService;
-import com.gmail.yauhenizhukovich.app.service.model.UserDTO;
-import com.gmail.yauhenizhukovich.app.service.util.PaginationUtil;
-import com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil;
+import com.gmail.yauhenizhukovich.app.service.model.user.AddUserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.LoginUserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.RoleEnumService;
+import com.gmail.yauhenizhukovich.app.service.model.user.UpdateUserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.UserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.user.UsersDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +26,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.COUNT_OF_USERS_BY_PAGE;
-import static org.mockito.ArgumentMatchers.any;
+import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getCountOfPagesByCountOfObjects;
+import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getStartPositionByPageNumber;
+import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDTOToDatabaseObject;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,17 +36,17 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
-    public static final String VALID_FIRSTNAME = "test";
-    public static final String VALID_LASTNAME = "test";
-    public static final String VALID_PATRONYMIC = "test";
-    public static final String VALID_EMAIL = "yauhenizhukovich@gmail.com";
-    public static final String VALID_PASSWORD = "test";
-    public static final String VALID_UNIQUE_NUMBER = "test";
-    public static final RoleEnumService VALID_ROLE = RoleEnumService.SECURE_API_USER;
-    public static final String INVALID_EMAIL = "test";
-    public static final String INVALID_FIRSTNAME = "test1";
-    public static final String INVALID_LASTNAME = "test%";
-    private static final String INVALID_PATRONYMIC = "test ";
+    public static final int PAGE = 3;
+    public static final long COUNT_OF_OBJECTS = 4L;
+    private static final String VALID_FIRSTNAME = "Ivan";
+    private static final String VALID_LASTNAME = "Ivanovich";
+    private static final String VALID_PATRONYMIC = "Ivanov";
+    private static final String VALID_EMAIL = "randommail@gmail.com";
+    private static final String VALID_PASSWORD = "test";
+    private static final String VALID_UNIQUE_NUMBER = UUID.randomUUID().toString();
+    private static final RoleEnumService VALID_ROLE = RoleEnumService.SECURE_API_USER;
+    private static final int START_POSITION = getStartPositionByPageNumber(PAGE, COUNT_OF_USERS_BY_PAGE);
+
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -55,163 +59,83 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getUserByValidEmail_returnUserDTO() {
-        User returnedUser = new User();
-        returnedUser.setRole(RoleEnumRepository.CUSTOMER_USER);
+    public void getUserByValidEmail_returnValidUser() {
+        User returnedUser = getUser();
         when(userRepository.getUserByEmail(VALID_EMAIL)).thenReturn(returnedUser);
-        UserDTO returnedUserDTO = UserConversionUtil.convertDatabaseObjectToDTOToLogin(returnedUser);
-        UserDTO actualUserDTO = userService.getUserByEmail(VALID_EMAIL);
+        LoginUserDTO actualUser = userService.getUserByEmail(VALID_EMAIL);
+        Assertions.assertThat(actualUser).isNotNull();
         verify(userRepository, times(1)).getUserByEmail(VALID_EMAIL);
-        Assertions.assertThat(actualUserDTO).isNotNull();
-        Assertions.assertThat(actualUserDTO).isEqualTo(returnedUserDTO);
+        Assertions.assertThat(actualUser.getEmail()).isEqualTo(returnedUser.getEmail());
+        Assertions.assertThat(actualUser.getPassword()).isEqualTo(returnedUser.getPassword());
+        RoleEnumService expectedRole = RoleEnumService.valueOf(returnedUser.getRole().name());
+        Assertions.assertThat(actualUser.getRole()).isEqualTo(expectedRole);
     }
 
     @Test
-    public void getUserByInvalidEmail_returnNotValidException() {
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.getUserByEmail(INVALID_EMAIL),
-                "Invalid email."
-        );
-    }
-
-    @Test
-    public void addUserWithInvalidEmail_returnNotValidException() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setEmail(INVALID_EMAIL);
-        userDTO.setFirstName(VALID_FIRSTNAME);
-        userDTO.setLastName(VALID_LASTNAME);
-        userDTO.setPatronymic(VALID_PATRONYMIC);
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.addUser(userDTO),
-                "Invalid email."
-        );
-    }
-
-    @Test
-    public void addUserWithInvalidSmallFirstName_returnNotValidException() {
-        UserDTO userDTO = new UserDTO();
-        String invalidFirstName = generateStringByLength(1);
-        userDTO.setFirstName(invalidFirstName);
-        userDTO.setLastName(VALID_LASTNAME);
-        userDTO.setPatronymic(VALID_PATRONYMIC);
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.addUser(userDTO),
-                "Invalid first name."
-        );
-    }
-
-    @Test
-    public void addUserWithInvalidBigFirstName_returnNotValidException() {
-        UserDTO userDTO = new UserDTO();
-        String invalidFirstName = generateStringByLength(21);
-        userDTO.setFirstName(invalidFirstName);
-        userDTO.setLastName(VALID_LASTNAME);
-        userDTO.setPatronymic(VALID_PATRONYMIC);
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.addUser(userDTO),
-                "Invalid first name."
-        );
-    }
-
-    @Test
-    public void addUserWithInvalidSmallLastName_returnNotValidException() {
-        UserDTO userDTO = new UserDTO();
-        String invalidLastName = generateStringByLength(1);
-        userDTO.setLastName(invalidLastName);
-        userDTO.setFirstName(VALID_FIRSTNAME);
-        userDTO.setPatronymic(VALID_PATRONYMIC);
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.addUser(userDTO),
-                "Invalid last name."
-        );
-    }
-
-    @Test
-    public void addUserWithInvalidBigLastName_returnNotValidException() {
-        UserDTO userDTO = new UserDTO();
-        String invalidLastName = generateStringByLength(41);
-        userDTO.setLastName(invalidLastName);
-        userDTO.setFirstName(VALID_FIRSTNAME);
-        userDTO.setPatronymic(VALID_PATRONYMIC);
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.addUser(userDTO),
-                "Invalid last name."
-        );
-    }
-
-    @Test
-    public void addUserWithInvalidBigPatronymic_returnNotValidException() {
-        UserDTO userDTO = new UserDTO();
-        String invalidPatronymic = generateStringByLength(44);
-        userDTO.setPatronymic(invalidPatronymic);
-        userDTO.setFirstName(VALID_FIRSTNAME);
-        userDTO.setLastName(VALID_LASTNAME);
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.addUser(userDTO),
-                "Invalid patronymic."
-        );
-    }
-
-    @Test
-    public void addUserWithInvalidPatternFirstName_returnNotValidException() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setFirstName(INVALID_FIRSTNAME);
-        userDTO.setLastName(VALID_LASTNAME);
-        userDTO.setPatronymic(VALID_PATRONYMIC);
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.addUser(userDTO),
-                "Invalid first name."
-        );
-    }
-
-    @Test
-    public void addUserWithInvalidPatternLastName_returnNotValidException() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setFirstName(VALID_FIRSTNAME);
-        userDTO.setLastName(INVALID_LASTNAME);
-        userDTO.setPatronymic(VALID_PATRONYMIC);
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.addUser(userDTO),
-                "Invalid last name."
-        );
-    }
-
-    @Test
-    public void addUserWithInvalidPatternPatronymic_returnNotValidException() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setFirstName(VALID_FIRSTNAME);
-        userDTO.setLastName(VALID_LASTNAME);
-        userDTO.setPatronymic(INVALID_PATRONYMIC);
-        org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> userService.addUser(userDTO),
-                "Invalid patronymic."
-        );
+    public void getUserByNonexistentEmail_returnNull() {
+        when(userRepository.getUserByEmail(VALID_EMAIL)).thenReturn(null);
+        LoginUserDTO user = userService.getUserByEmail(VALID_EMAIL);
+        Assertions.assertThat(user).isNull();
+        verify(userRepository, times(1)).getUserByEmail(VALID_EMAIL);
     }
 
     @Test
     public void getUsersByPage_returnUsers() {
-        int pageNumber = 5;
-        int startPosition = PaginationUtil.getStartPositionByPageNumber(pageNumber, COUNT_OF_USERS_BY_PAGE);
-        List<User> returnedUsers = new ArrayList<>();
-        when(userRepository.getObjectsByStartPositionAndMaxResult(startPosition, COUNT_OF_USERS_BY_PAGE))
+        List<User> returnedUsers = getUsers();
+        when(userRepository.getObjectsByStartPositionAndMaxResult(START_POSITION, COUNT_OF_USERS_BY_PAGE))
                 .thenReturn(returnedUsers);
-        List<UserDTO> returnedUsersDTO = returnedUsers.stream()
-                .map(UserConversionUtil::convertDatabaseObjectToDTO)
-                .collect(Collectors.toList());
-        List<UserDTO> actualUsersDTO = userService.getUsersByPage(pageNumber);
-        verify(userRepository, times(1)).getObjectsByStartPositionAndMaxResult(startPosition, COUNT_OF_USERS_BY_PAGE);
-        Assertions.assertThat(actualUsersDTO).isNotNull();
-        Assertions.assertThat(actualUsersDTO).isEqualTo(returnedUsersDTO);
+        List<UsersDTO> actualUsers = userService.getUsersByPage(PAGE);
+        Assertions.assertThat(actualUsers).isNotNull();
+        verify(userRepository, times(1)).getObjectsByStartPositionAndMaxResult(START_POSITION, COUNT_OF_USERS_BY_PAGE);
+        UsersDTO actualUser = actualUsers.get(0);
+        User returnedUser = returnedUsers.get(0);
+        Assertions.assertThat(actualUser.getUniqueNumber()).isEqualTo(returnedUser.getUniqueNumber());
+        Assertions.assertThat(actualUser.getLastName()).isEqualTo(returnedUser.getUserDetails().getLastName());
+        Assertions.assertThat(actualUser.getEmail()).isEqualTo(returnedUser.getEmail());
+    }
+
+    @Test
+    public void getCountOfPages_returnPages() {
+        when(userRepository.getCountOfObjects()).thenReturn(COUNT_OF_OBJECTS);
+        int pages = userService.getCountOfPages();
+        verify(userRepository, times(1)).getCountOfObjects();
+        Assertions.assertThat(pages).isEqualTo(getCountOfPagesByCountOfObjects(COUNT_OF_OBJECTS, COUNT_OF_USERS_BY_PAGE));
+    }
+
+    @Test
+    public void addValidUser_returnUser() throws UserExistenceException {
+        AddUserDTO addedUser = getAddedUser();
+        when(userRepository.getUserByEmail(addedUser.getEmail())).thenReturn(null);
+        User returnedUser = getUser();
+        when(userRepository.add(convertDTOToDatabaseObject(addedUser))).thenReturn(returnedUser);
+        UserDTO actualUser = userService.addUser(addedUser);
+        Assertions.assertThat(actualUser).isNotNull();
+        verify(userRepository, times(1)).getUserByEmail(addedUser.getEmail());
+        verify(userRepository, times(1)).add(convertDTOToDatabaseObject(addedUser));
+        Assertions.assertThat(actualUser.getPatronymic()).isEqualTo(addedUser.getPatronymic());
+        Assertions.assertThat(actualUser.getEmail()).isEqualTo(addedUser.getEmail());
+        Assertions.assertThat(actualUser.getRole()).isEqualTo(addedUser.getRole());
+    }
+
+    @Test
+    public void getUserByValidUniqueNumber_returnValidUser() {
+        User returnedUser = getUser();
+        when(userRepository.getUserByUniqueNumber(VALID_UNIQUE_NUMBER)).thenReturn(returnedUser);
+        UserDTO actualUser = userService.getUserByUniqueNumber(VALID_UNIQUE_NUMBER);
+        Assertions.assertThat(actualUser).isNotNull();
+        verify(userRepository, times(1)).getUserByUniqueNumber(VALID_UNIQUE_NUMBER);
+        Assertions.assertThat(actualUser.getEmail()).isEqualTo(returnedUser.getEmail());
+        Assertions.assertThat(actualUser.getPassword()).isEqualTo(returnedUser.getPassword());
+        RoleEnumService expectedRole = RoleEnumService.valueOf(returnedUser.getRole().name());
+        Assertions.assertThat(actualUser.getRole()).isEqualTo(expectedRole);
+    }
+
+    @Test
+    public void getUserByNonexistentUniqueNumber_returnNull() {
+        when(userRepository.getUserByUniqueNumber(VALID_UNIQUE_NUMBER)).thenReturn(null);
+        UserDTO user = userService.getUserByUniqueNumber(VALID_UNIQUE_NUMBER);
+        Assertions.assertThat(user).isNull();
+        verify(userRepository, times(1)).getUserByUniqueNumber(VALID_UNIQUE_NUMBER);
     }
 
     @Test
@@ -222,10 +146,11 @@ public class UserServiceTest {
         returnedUser.setRole(RoleEnumRepository.SALE_USER);
         when(userRepository.getCountOfUsersByRole(RoleEnumRepository.ADMINISTRATOR)).thenReturn(3L);
         when(userRepository.getUserByUniqueNumber(VALID_UNIQUE_NUMBER)).thenReturn(returnedUser);
-        userService.deleteUsersByUniqueNumber(uniqueNumbers);
+        boolean isDeleted = userService.deleteUsersByUniqueNumber(uniqueNumbers);
         verify(userRepository, times(1)).getCountOfUsersByRole(RoleEnumRepository.ADMINISTRATOR);
         verify(userRepository, times(1)).getUserByUniqueNumber(VALID_UNIQUE_NUMBER);
         verify(userRepository, times(1)).delete(returnedUser);
+        Assertions.assertThat(isDeleted).isTrue();
     }
 
     @Test
@@ -243,76 +168,68 @@ public class UserServiceTest {
         );
     }
 
-    @Test
-    public void getListOfPageNumbers_returnListOfPages() {
-        Long countOfObjects = 30L;
-        when(userRepository.getCountOfObjects()).thenReturn(countOfObjects);
-        List<Integer> returnedCountOfPages = getReturnedCountOfPages(countOfObjects);
-        List<Integer> actualCountOfPages = userService.getPages();
-        verify(userRepository, times(1)).getCountOfObjects();
-        Assertions.assertThat(actualCountOfPages).isNotNull();
-        Assertions.assertThat(actualCountOfPages).isEqualTo(returnedCountOfPages);
+   /* @Test                                 TODO
+    public void getUserProfile_() {
+        userService.getUserProfile()
     }
+*/
+
+    /* @Test                                 TODO
+     public void updateUserProfile_() {
+         userService.updateUserProfile()
+     }
+ */
 
     @Test
-    public void updateRoleByUniqueNumber_returnActualStatus() throws AdministratorChangingException {
-        User returnedUser = new User();
-        returnedUser.setRole(RoleEnumRepository.ADMINISTRATOR);
-        UserDetails userDetails = new UserDetails();
-        userDetails.setFirstName(VALID_FIRSTNAME);
-        userDetails.setLastName(VALID_LASTNAME);
-        returnedUser.setUserDetails(userDetails);
-        when(userRepository.getCountOfUsersByRole(RoleEnumRepository.ADMINISTRATOR)).thenReturn(3L);
+    public void updateUser_returnUpdatedUser() throws AdministratorChangingException {
+        User returnedUser = getUser();
         when(userRepository.getUserByUniqueNumber(VALID_UNIQUE_NUMBER)).thenReturn(returnedUser);
-        UserDTO actualResult = userService.updateRoleByUniqueNumber(VALID_ROLE, VALID_UNIQUE_NUMBER);
+        UpdateUserDTO updateUser = new UpdateUserDTO();
+        updateUser.setUniqueNumber(VALID_UNIQUE_NUMBER);
+        updateUser.setRole(RoleEnumService.CUSTOMER_USER);
+        UserDTO actualUser = userService.updateUser(updateUser);
+        Assertions.assertThat(actualUser).isNotNull();
         verify(userRepository, times(1)).getUserByUniqueNumber(VALID_UNIQUE_NUMBER);
-        verify(userRepository, times(1)).getCountOfUsersByRole(RoleEnumRepository.ADMINISTRATOR);
-        Assertions.assertThat(actualResult).isNotNull();
+        Assertions.assertThat(actualUser.getRole()).isEqualTo(updateUser.getRole());
     }
 
     @Test
-    public void updateRoleByUniqueNumber_returnIsUpdated() {
-        when(userRepository.getCountOfUsersByRole(RoleEnumRepository.ADMINISTRATOR)).thenReturn(1L);
-        User returnedUser = new User();
+    public void updateLastAdministrator_returnAdministratorChangingException() {
+        User returnedUser = getUser();
         returnedUser.setRole(RoleEnumRepository.ADMINISTRATOR);
         when(userRepository.getUserByUniqueNumber(VALID_UNIQUE_NUMBER)).thenReturn(returnedUser);
+        when(userRepository.getCountOfUsersByRole(RoleEnumRepository.ADMINISTRATOR)).thenReturn(1L);
+        UpdateUserDTO updateUser = new UpdateUserDTO();
+        updateUser.setUniqueNumber(VALID_UNIQUE_NUMBER);
+        updateUser.setRole(RoleEnumService.CUSTOMER_USER);
         org.junit.jupiter.api.Assertions.assertThrows(
                 AdministratorChangingException.class,
-                () -> userService.updateRoleByUniqueNumber(VALID_ROLE, VALID_UNIQUE_NUMBER),
-                "You cant have no administrators."
+                () -> userService.updateUser(updateUser),
+                "You cant update last administrator's role."
         );
-    }
-
-    private UserDTO getUserDTO() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setRole(RoleEnumService.CUSTOMER_USER);
-        userDTO.setEmail(VALID_EMAIL);
-        userDTO.setFirstName(VALID_FIRSTNAME);
-        userDTO.setLastName(VALID_LASTNAME);
-        userDTO.setPatronymic(VALID_PATRONYMIC);
-        return userDTO;
     }
 
     private User getUser() {
         User user = new User();
         user.setEmail(VALID_EMAIL);
         user.setPassword(VALID_PASSWORD);
-        user.setRole(RoleEnumRepository.SALE_USER);
+        user.setRole(RoleEnumRepository.valueOf(VALID_ROLE.name()));
         UserDetails userDetails = new UserDetails();
         user.setUserDetails(userDetails);
         return user;
     }
 
-    private List<Integer> getReturnedCountOfPages(Long countOfObjects) {
-        return PaginationUtil.getCountOfPages(countOfObjects, COUNT_OF_USERS_BY_PAGE);
+    private AddUserDTO getAddedUser() {
+        AddUserDTO user = new AddUserDTO();
+        user.setRole(VALID_ROLE);
+        user.setEmail(VALID_EMAIL);
+        return user;
     }
 
-    private String generateStringByLength(int length) {
-        StringBuilder stringBuilder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            stringBuilder.append('a');
-        }
-        return stringBuilder.toString();
+    private List<User> getUsers() {
+        List<User> users = new ArrayList<>();
+        users.add(getUser());
+        return users;
     }
 
 }

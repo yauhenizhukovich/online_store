@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Items</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-4 text-center"><strong>ITEMS</strong></h1>
+<div class="col" th:if="${not #lists.isEmpty(items)}">
+    <table class="table table-bordered text-center">
+        <thead>
+        <tr>
+            <td scope="col">#</td>
+            <td scope="col">Name</td>
+            <td scope="col">Unique number</td>
+            <td scope="col">Price</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item, status : ${items}">
+            <td scope="row" th:text="${status.count}"></td>
+            <td th:text="${item.name}">Name not defined</td>
+            <td th:text="${item.uniqueNumber}">Review text not defined</td>
+            <td th:text="${item.price}">Date not defined</td>
+            <td>
+                <a th:href="@{/items/{id}(id=${item.id})}" class="btn btn-info"
+                   role="button">Full item</a>
+            </td>
+            <td>
+                <form action="#" th:action="@{/items/{id}/copy(id=${item.id})}" method="post">
+                    <input type="submit" class="btn btn-success" value="Copy item"/>
+                </form>
+            </td>
+            <td>
+                <form action="#" th:action="@{/items/{id}(id=${item.id})}" method="post">
+                    <input type="submit" class="btn btn-danger" value="Delete item"/>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav th:if="${pages gt 1}">
+        <ul class="pagination justify-content-center">
+            <li th:each="page: ${#numbers.sequence(1, pages)}" class="page-item active">
+                <a class="page-link" th:name="'page' + ${page}" th:href="@{/items(page=${page})}" th:text="${page}"
+                   th:value="${page}"/>
+            </li>
+        </ul>
+    </nav>
+    <br>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<div class="lead text-center" th:unless="${not #lists.isEmpty(items)}">
+    <p>There are no items...</p>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

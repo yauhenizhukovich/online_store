@@ -1,4 +1,4 @@
-package com.gmail.yauhenizhukovich.app.service.model;
+package com.gmail.yauhenizhukovich.app.service.model.user;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,10 +11,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class AppUser implements UserDetails {
 
     public static final String ROLE_PREFIX = "ROLE_";
-    private final UserDTO user;
+    private final LoginUserDTO user;
     private final List<SimpleGrantedAuthority> authorities;
 
-    public AppUser(UserDTO user) {
+    public AppUser(LoginUserDTO user) {
         this.user = user;
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority(ROLE_PREFIX + user.getRole().name()));
     }

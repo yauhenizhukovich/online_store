@@ -4,13 +4,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.stream.events.Comment;
-
 import com.gmail.yauhenizhukovich.app.service.ArticleService;
-import com.gmail.yauhenizhukovich.app.service.model.ArticleDTO;
-import com.gmail.yauhenizhukovich.app.service.model.CommentDTO;
-import com.gmail.yauhenizhukovich.app.service.model.RoleEnumService;
-import com.gmail.yauhenizhukovich.app.service.model.UserDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.ArticleDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.ArticlesDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.CommentDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ArticleController.class)
@@ -40,7 +38,7 @@ class ArticleControllerTest {
     private static final String VALID_TITLE = "Good article!";
     private static final String VALID_AUTHOR_FIRSTNAME = "I";
     private static final String VALID_AUTHOR_LASTNAME = "Moria";
-    private static final String VALID_RUNDOWN = "This is articles rundown!";
+    private static final String VALID_RUNDOWN = "This is the test content of article.";
     private static final String VALID_CONTENT = "This is the test content of article.";
     @Autowired
     private MockMvc mockMvc;
@@ -73,13 +71,13 @@ class ArticleControllerTest {
         mockMvc.perform(get("/articles")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE))).andExpect(status().isOk());
-        verify(articleService, times(1)).getPages();
+        verify(articleService, times(1)).getCountOfPages();
         verify(articleService, times(1)).getArticlesByPage(eq(PAGE));
     }
 
     @Test
     void getArticles_returnArticles() throws Exception {
-        List<ArticleDTO> articles = getOneArticleList();
+        List<ArticlesDTO> articles = getOneArticleList();
         when(articleService.getArticlesByPage(PAGE)).thenReturn(articles);
         MvcResult result = mockMvc.perform(get("/articles")
                 .contentType(MediaType.TEXT_HTML)
@@ -92,7 +90,7 @@ class ArticleControllerTest {
 
     @Test
     void getArticlePage_returnStatusOk() throws Exception {
-        ArticleDTO article = getArticle();
+        ArticleDTO article = getArticleDTO();
         when(articleService.getArticleById(VALID_ID)).thenReturn(article);
         mockMvc.perform(get("/articles/{id}", VALID_ID))
                 .andExpect(status().isOk());
@@ -100,7 +98,7 @@ class ArticleControllerTest {
 
     @Test
     void getArticlePageById_callBusinessLogic() throws Exception {
-        ArticleDTO article = getArticle();
+        ArticleDTO article = getArticleDTO();
         when(articleService.getArticleById(VALID_ID)).thenReturn(article);
         mockMvc.perform(get("/articles/{id}", VALID_ID))
                 .andExpect(status().isOk());
@@ -109,7 +107,7 @@ class ArticleControllerTest {
 
     @Test
     void getArticlePageById_returnValidArticle() throws Exception {
-        ArticleDTO article = getArticle();
+        ArticleDTO article = getArticleDTO();
         when(articleService.getArticleById(VALID_ID)).thenReturn(article);
         MvcResult result = mockMvc.perform(get("/articles/{id}", VALID_ID))
                 .andReturn();
@@ -119,21 +117,35 @@ class ArticleControllerTest {
         Assertions.assertThat(actualContent).contains(VALID_CONTENT);
     }
 
-    private List<ArticleDTO> getOneArticleList() {
-        List<ArticleDTO> articles = new ArrayList<>();
-        ArticleDTO article = getArticle();
+    private List<ArticlesDTO> getOneArticleList() {
+        List<ArticlesDTO> articles = new ArrayList<>();
+        ArticlesDTO article = getArticlesDTO();
         articles.add(article);
         return articles;
     }
 
-    private ArticleDTO getArticle() {
+    private ArticlesDTO getArticlesDTO() {
+        ArticlesDTO article = new ArticlesDTO();
+        article.setId(VALID_ID);
+        article.setDate(VALID_DATE);
+        article.setTitle(VALID_TITLE);
+        article.setRundown(VALID_RUNDOWN);
+        article.setAuthorFirstName(VALID_AUTHOR_FIRSTNAME);
+        article.setAuthorLastName(VALID_AUTHOR_LASTNAME);
+        List<CommentDTO> comments = new ArrayList<>();
+        CommentDTO comment = getComment();
+        comments.add(comment);
+        comments.add(comment);
+        return article;
+    }
+
+    private ArticleDTO getArticleDTO() {
         ArticleDTO article = new ArticleDTO();
         article.setId(VALID_ID);
         article.setDate(VALID_DATE);
         article.setTitle(VALID_TITLE);
         article.setAuthorFirstName(VALID_AUTHOR_FIRSTNAME);
         article.setAuthorLastName(VALID_AUTHOR_LASTNAME);
-        article.setRundown(VALID_RUNDOWN);
         article.setContent(VALID_CONTENT);
         List<CommentDTO> comments = new ArrayList<>();
         CommentDTO comment = getComment();

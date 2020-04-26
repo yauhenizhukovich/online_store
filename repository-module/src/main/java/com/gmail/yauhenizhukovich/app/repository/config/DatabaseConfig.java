@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
+import static com.gmail.yauhenizhukovich.app.repository.constant.DatabaseConstant.ENTITY_PACKAGE;
+
 @Configuration
 public class DatabaseConfig {
 
@@ -14,7 +16,7 @@ public class DatabaseConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean entityManager = new LocalContainerEntityManagerFactoryBean();
         entityManager.setDataSource(dataSource);
-        entityManager.setPackagesToScan("com.gmail.yauhenizhukovich.app.repository.model");
+        entityManager.setPackagesToScan(ENTITY_PACKAGE);
         entityManager.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         return entityManager;
     }
