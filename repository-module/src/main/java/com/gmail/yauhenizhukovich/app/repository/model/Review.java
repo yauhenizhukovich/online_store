@@ -77,13 +77,14 @@ public class Review {
         Review review = (Review) o;
         return active == review.active &&
                 Objects.equals(id, review.id) &&
+                Objects.equals(fullName, review.fullName) &&
                 Objects.equals(reviewText, review.reviewText) &&
                 Objects.equals(date, review.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, reviewText, date, active);
+        return Objects.hash(id, fullName, reviewText, date, active);
     }
 
 }

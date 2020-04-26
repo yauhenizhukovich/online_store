@@ -31,6 +31,10 @@ public class UserDetails {
     private String firstName;
     @Column
     private String patronymic;
+    @Column
+    private String address;
+    @Column
+    private String telephone;
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User user;
@@ -75,6 +79,22 @@ public class UserDetails {
         this.patronymic = patronymic;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -84,12 +104,17 @@ public class UserDetails {
             return false;
         }
         UserDetails that = (UserDetails) o;
-        return Objects.equals(userId, that.userId);
+        return Objects.equals(userId, that.userId) &&
+                Objects.equals(lastName, that.lastName) &&
+                Objects.equals(firstName, that.firstName) &&
+                Objects.equals(patronymic, that.patronymic) &&
+                Objects.equals(address, that.address) &&
+                Objects.equals(telephone, that.telephone);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId);
+        return Objects.hash(userId, lastName, firstName, patronymic, address, telephone);
     }
 
 }

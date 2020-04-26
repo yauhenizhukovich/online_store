@@ -6,16 +6,9 @@ import java.util.stream.IntStream;
 
 public class PaginationUtil {
 
-    private static final int COUNT_OF_USERS_BY_PAGE = 10;
-    private static final int COUNT_OF_REVIEWS_BY_PAGE = 10;
-
-    public static int getCountOfUsersByPage() {
-        return COUNT_OF_USERS_BY_PAGE;
-    }
-
-    public static int getCountOfReviewsByPage() {
-        return COUNT_OF_REVIEWS_BY_PAGE;
-    }
+    public static final int COUNT_OF_USERS_BY_PAGE = 10;
+    public static final int COUNT_OF_REVIEWS_BY_PAGE = 10;
+    public static final int COUNT_OF_ARTICLES_BY_PAGE = 10;
 
     public static int getStartPositionByPageNumber(int pageNumber, int objectsByPage) {
         return (pageNumber - 1) * objectsByPage;

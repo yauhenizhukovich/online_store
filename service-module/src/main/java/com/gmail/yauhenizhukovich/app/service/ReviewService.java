@@ -8,10 +8,10 @@ public interface ReviewService {
 
     List<ReviewDTO> getReviewsByPage(Integer pageNumber);
 
-    List<Integer> getListOfPageNumbers();
+    List<Integer> getPages();
 
-    boolean deleteReviewById(Long id);
+    void deleteReviewById(Long id);
 
-    List<Boolean> updateActivityByIds(Long[] ids);
+    List<ReviewDTO> updateActivityByIds(Long[] ids);
 
 }

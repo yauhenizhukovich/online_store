@@ -1,10 +1,8 @@
 package com.gmail.yauhenizhukovich.app.web.config;
 
-import com.gmail.yauhenizhukovich.app.service.model.RoleEnum;
+import com.gmail.yauhenizhukovich.app.service.model.RoleEnumService;
 import com.gmail.yauhenizhukovich.app.web.security.LoginAccessDeniedHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,7 +38,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/users/**", "/reviews/**")
-                .hasRole(RoleEnum.ADMINISTRATOR.name())
+                .hasAnyRole(RoleEnumService.ADMINISTRATOR.name())
+                .antMatchers("/articles/**", "/users/profile")
+                .hasAnyRole(RoleEnumService.CUSTOMER_USER.name())
+                .antMatchers("/api/**")
+                .hasAnyRole(RoleEnumService.SECURE_API_USER.name())
                 .and()
                 .formLogin()
                 .loginPage("/users/login")

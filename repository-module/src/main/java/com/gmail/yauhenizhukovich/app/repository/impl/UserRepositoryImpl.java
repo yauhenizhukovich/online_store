@@ -1,10 +1,11 @@
 package com.gmail.yauhenizhukovich.app.repository.impl;
 
 import java.util.List;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import com.gmail.yauhenizhukovich.app.repository.UserRepository;
-import com.gmail.yauhenizhukovich.app.repository.model.RoleEnum;
+import com.gmail.yauhenizhukovich.app.repository.model.RoleEnumRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.User;
 import org.springframework.stereotype.Repository;
 
@@ -27,7 +28,12 @@ public class UserRepositoryImpl extends GenericRepositoryImpl<Long, User> implem
         String queryString = "FROM " + entityClass.getSimpleName() + " e WHERE e.email=:email";
         Query query = entityManager.createQuery(queryString);
         query.setParameter("email", email);
-        return (User) query.getSingleResult();
+        try {
+            Object result = query.getSingleResult();
+            return (User) result;
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     @Override
@@ -39,7 +45,7 @@ public class UserRepositoryImpl extends GenericRepositoryImpl<Long, User> implem
     }
 
     @Override
-    public Long getCountOfUsersByRole(RoleEnum role) {
+    public Long getCountOfUsersByRole(RoleEnumRepository role) {
         String queryString = "SELECT COUNT(e.uniqueNumber) FROM " + entityClass.getSimpleName() + " e WHERE e.role=:role";
         Query query = entityManager.createQuery(queryString);
         query.setParameter("role", role);

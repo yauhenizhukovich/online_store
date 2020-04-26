@@ -9,7 +9,7 @@
 <body>
 <h1 class="display-4 text-center"><strong>USERS</strong></h1>
 <div class="col" th:if="${not #lists.isEmpty(users)}">
-    <form action="#" th:action="@{/users/delete(pageNumber=${pageNumber})}" method="post">
+    <form action="#" th:action="@{/users/delete}" method="post">
         <table class="table table-bordered text-center">
             <thead>
             <tr>
@@ -19,7 +19,6 @@
                 <td scope="col">Email</td>
                 <td scope="col">Role</td>
                 <td></td>
-                <td></td>
             </tr>
             </thead>
             <tbody>
@@ -27,57 +26,33 @@
                 <td>
                     <input type="checkbox" name="uniqueNumbers" th:value="${user.uniqueNumber}"/>
                 </td>
-                <td th:text="${status.count}"></td>
+                <td th:text="${status.count}"/>
                 <td th:text="${user.lastName + ' ' + user.firstName + ' ' + user.patronymic}">Name not defined</td>
                 <td th:text="${user.email}">Email not defined</td>
-                <td th:text="${#strings.replace(user.role,'_',' ').toUpperCase()}">Role not defined</td>
-                <td>
-                    <a th:href="@{/users/{uniqueNumber}/update/password(uniqueNumber=${user.uniqueNumber}, pageNumber=${pageNumber})}"
-                       class="btn btn-secondary"
-                       role="button">Generate
-                        new password</a>
+                <td th:value="${user.role}" th:text="${#strings.replace(user.role,'_',' ').toUpperCase()}">
+                    Role not defined
                 </td>
                 <td>
-                    <div th:unless="${#strings.equals(param.uniqueNumber, user.uniqueNumber)}">
-                        <a th:href="@{/users/page/{pageNumber}(uniqueNumber=${user.uniqueNumber}, pageNumber=${pageNumber})}"
-                           class="btn btn-secondary"
-                           role="button">Change
-                            role</a>
-                    </div>
-                    <div th:if="${#strings.equals(param.uniqueNumber, user.uniqueNumber)}">
-                        Set role:
-                        <select name="userRole">
-                            <option th:each="role : ${roles}" th:text="${#strings.replace(role,'_',' ').toLowerCase()}" th:value="${role}">
-                                Role
-                            </option>
-                        </select>
-                        <input type="submit"
-                               th:formaction="@{/users/{uniqueNumber}/update/role(uniqueNumber=${user.uniqueNumber}, pageNumber=${pageNumber})}"
-                               th:formmethod="post" value="Change role" class="btn btn-secondary">
-                    </div>
+                    <a th:href="@{/users/{uniqueNumber}(uniqueNumber=${user.uniqueNumber})}"
+                       class="btn btn-primary" role="button">Edit user data</a>
                 </td>
             </tr>
             </tbody>
         </table>
+        <div class="alert alert-info" th:if="${param.message}" th:text="${param.message}">
+        </div>
         <div th:if="${#lists.size(pages) gt 1}" class="text-center">
             Pages<br>
             <div class="btn-group mr-2 text-center" role="group">
                 <div th:each="page : ${pages}">
-                    <a th:href="@{/reviews/page/{pageNumber}(pageNumber=${page})}" th:text="${page}" th:value="${page}"
+                    <a th:name="'page' + ${page}" th:href="@{/users(page=${page})}" th:text="${page}"
+                       th:value="${page}"
                        class="btn btn-secondary"
-                       role="button">Page Number</a>
+                       role="button">Page</a>
                 </div>
             </div>
         </div>
         <br>
-        <div th:if="${param.error}">
-            <div class="alert alert-warning" th:text="${param.error}">
-            </div>
-        </div>
-        <div th:if="${param.message}">
-            <div class="alert alert-success" th:text="${param.message}">
-            </div>
-        </div>
         <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
         <input type="submit" class="btn btn-primary" value="Delete checked users"/>
         <a th:href="@{/users/add}" class="btn btn-primary" role="button">Add user</a>

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class AppUserDetailsService implements UserDetailsService {
 
     private static final Logger logger = LogManager.getLogger(MethodHandles.lookup().lookupClass());
-    private UserService userService;
+    private final UserService userService;
 
     public AppUserDetailsService(UserService userService) {this.userService = userService;}
 

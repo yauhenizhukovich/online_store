@@ -1,6 +1,6 @@
 package com.gmail.yauhenizhukovich.app.service.model;
 
-public enum RoleEnum {
+public enum RoleEnumService {
     ADMINISTRATOR,
     SALE_USER,
     CUSTOMER_USER,

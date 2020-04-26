@@ -8,5 +8,7 @@ public interface UserValidationRules {
     int MAX_PATRONYMIC_SIZE = 40;
     String NAME_PATTERN = "^[a-zA-Z]*$";
     String EMAIL_PATTERN = "^[a-zA-Z0-9_]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
+    String ADDRESS_PATTERN = "^[a-zA-Z0-9 ,.]*$";
+    String TELEPHONE_PATTERN = "^[0-9+-]*$";
 
 }
