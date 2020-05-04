@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
 </head>
 <body>
-<h1 class="display-4 text-center"><strong>REVIEWS</strong></h1>
+<h1 class="display-4 text-center font-italic"><strong>REVIEWS</strong></h1>
 <div class="col" th:if="${not #lists.isEmpty(reviews)}">
     <form action="#" th:action="@{/reviews}" method="post">
         <table class="table table-bordered text-center">
@@ -28,7 +28,7 @@
                     <input type="checkbox" name="ids" th:value="${review.id}"/>
                 </td>
                 <td scope="row" th:text="${status.count}"></td>
-                <td th:text="${review.fullName}">Name not defined</td>
+                <td th:text="${review.authorName}">Name not defined</td>
                 <td th:text="${review.reviewText}">Review text not defined</td>
                 <td th:text="${review.date}">Date not defined</td>
                 <td th:text="${review.active} ? 'SHOWED' : 'NOT SHOWED'">Status not defined</td>
@@ -39,16 +39,14 @@
             </tr>
             </tbody>
         </table>
-        <div th:if="${#lists.size(pages) gt 1}" class="text-center">
-            Pages<br>
-            <div class="btn-group mr-2 text-center" role="group">
-                <div th:each="page : ${pages}">
-                    <a th:href="@{/reviews(page=${page})}" th:text="${page}" th:value="${page}"
-                       class="btn btn-secondary"
-                       role="button">Page</a>
-                </div>
-            </div>
-        </div>
+        <nav th:if="${pages gt 1}">
+            <ul class="pagination justify-content-center">
+                <li th:each="page: ${#numbers.sequence(1, pages)}" class="page-item active">
+                    <a class="page-link" th:name="'page' + ${page}" th:href="@{/reviews(page=${page})}" th:text="${page}"
+                       th:value="${page}"/>
+                </li>
+            </ul>
+        </nav>
         <br>
         <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
         <input type="submit" class="btn btn-primary" value="Update checked reviews status"/>

@@ -6,57 +6,62 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
 </head>
 <body>
-<h1 class="display-3 text-center"><strong>ADD USER</strong></h1>
 <div class="container">
     <div class="row">
         <div class="col-sm">
+            <h1 class="display-3 text-center font-italic"><strong>ADD USER</strong></h1>
         </div>
+        <div class="col-sm"></div>
+        <div class="col-sm"></div>
+    </div>
+</div>
+<div class="container" th:object="${user}">
+    <div class="row">
         <div class="col-sm">
-            <form action="#" th:action="@{/users}" method="post" th:object="${user}">
-                <fieldset>
-                    <div th:if="${user ne null}" th:name="User_model"></div>
-                    <div class="form-group">
-                        First name: <input type="text" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"
-                                           th:value="*{firstName}">
-                    </div>
-                    <div class="form-group">
-                        Last name: <input type="text" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="lastName"
-                                          th:value="*{lastName}">
-                    </div>
-                    <div class="form-group">
-                        Patronymic: <input type="text" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="patronymic"
-                                           th:value="*{patronymic}">
-                    </div>
-                    <div class="form-group">
-                        Email: <input type="email" maxlength="50" name="email" th:value="*{email}"/>
-                    </div>
-                    <div class="form-group">
-                        Role: <select name="role">
-                        <option th:each="role : ${roles}" th:text="${#strings.replace(role,'_',' ').toLowerCase()}" th:value="${role}">
-                            Role
-                        </option>
+            <form action="#" th:action="@{/users}" method="post">
+                <div th:if="${user ne null}" th:name="User_model"></div>
+                <div class="form-group">
+                    <label for="firstNameInput" class="font-weight-normal">First name</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"
+                           th:value="*{firstName}" id="firstNameInput">
+                </div>
+                <div class="form-group">
+                    <label for="lastNameInput" class="font-weight-normal">Last name</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="lastName"
+                           th:value="*{lastName}" id="lastNameInput">
+                </div>
+                <div class="form-group">
+                    <label for="patronymicInput" class="font-weight-normal">Patronymic</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="patronymic"
+                           th:value="*{patronymic}" id="patronymicInput">
+                </div>
+                <div class="form-group">
+                    <label for="emailInput" class="font-weight-normal">Email</label>
+                    <input type="email" class="form-control" maxlength="50" name="email" th:value="*{email}" id="emailInput"/>
+                </div>
+                <div class="form-group">
+                    <label for="roleInput" class="font-weight-normal">Role</label>
+                    <select name="role" class="form-control" id="roleInput">
+                        <option th:each="role : ${roles}"
+                                th:text="${
+                                #strings.substring(role,0,1)
+                                .concat(#strings.substring(role,1)
+                                .toLowerCase()
+                                .replace('_',' '))
+                                }"
+                                th:value="${role}"/>
                     </select>
-                    </div>
-                    <div class="form-group">
-                        Address: <input type="address" maxlength="100" name="address" th:value="*{address}"/>
-                    </div>
-                    <div class="form-group">
-                        Telephone: <input type="telephone" maxlength="40" name="telephone" th:value="*{telephone}"/>
-                    </div>
-                    <div th:if="${param.error}" th:text="${param.error}"/>
-                    <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"/>
-                    <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"/>
-                    <div th:if="${#fields.hasErrors('patronymic')}" th:errors="*{patronymic}"/>
-                    <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"/>
-                    <div th:if="${#fields.hasErrors('address')}" th:errors="*{address}"/>
-                    <div th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}"/>
-                    <button type="submit" class="btn btn-primary">Add</button>
-                    <br><br>
-                    <a th:href="@{/users}" class="btn btn-primary" role="button">Back to users</a>
-                </fieldset>
+                </div>
+                <input type="submit" class="btn btn-success" value="Add user"/>
+                <a th:href="@{/users}" class="btn btn-primary" role="button">Back to users</a>
             </form>
         </div>
         <div class="col-sm">
+            <div class="alert alert-info text-center" th:if="${error ne null}" th:text="${error}"/>
+            <div class="alert alert-warning text-center" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"/>
+            <div class="alert alert-warning text-center" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"/>
+            <div class="alert alert-warning text-center" th:if="${#fields.hasErrors('patronymic')}" th:errors="*{patronymic}"/>
+            <div class="alert alert-warning text-center" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"/>
         </div>
     </div>
 </div>

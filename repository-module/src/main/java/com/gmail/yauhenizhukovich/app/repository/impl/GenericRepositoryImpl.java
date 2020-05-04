@@ -27,8 +27,9 @@ public abstract class GenericRepositoryImpl<I, T> implements GenericRepository<I
     }
 
     @Override
-    public void delete(T t) {
+    public boolean delete(T t) {
         entityManager.remove(t);
+        return true;
     }
 
     @Override

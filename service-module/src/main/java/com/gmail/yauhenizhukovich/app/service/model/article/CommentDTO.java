@@ -1,4 +1,4 @@
-package com.gmail.yauhenizhukovich.app.service.model;
+package com.gmail.yauhenizhukovich.app.service.model.article;
 
 import java.time.LocalDate;
 
@@ -8,6 +8,7 @@ public class CommentDTO {
     private String authorLastName;
     private LocalDate date;
     private String content;
+    private Long id;
 
     public String getAuthorFirstName() {
         return authorFirstName;
@@ -39,6 +40,14 @@ public class CommentDTO {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 
 }

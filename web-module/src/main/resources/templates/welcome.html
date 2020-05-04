@@ -7,14 +7,15 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
 </head>
 <body>
-<h1 class="display-3 text-center"><strong>ADMINISTRATOR ACCESS AREA</strong></h1>
+<h1 class="display-3 text-center font-italic"><strong>ADMINISTRATOR ACCESS AREA</strong></h1>
 <a href="#" th:href="@{/users}" class="btn btn-success btn-lg btn-block" role="button">Users</a>
 <a href="#" th:href="@{/reviews}" class="btn btn-success btn-lg btn-block" role="button">Reviews</a>
 <a href="#" th:href="@{/articles}" class="btn btn-success btn-lg btn-block" role="button">Articles</a>
-<a href="#" th:href="@{/users/profile}" class="btn btn-success btn-lg btn-block" role="button">Check your profile</a><br>
-<div th:if="${param.message}" th:text="${param.message}"/>
+<a href="#" th:href="@{/items}" class="btn btn-success btn-lg btn-block" role="button">Items</a>
+<a href="#" th:href="@{/profile}" class="btn btn-success btn-lg btn-block" role="button">Check your profile</a><br>
+<div class="alert alert-info text-center" th:if="${param.message}" th:text="${param.message}"/>
 <div class="text-center">
-    <a href="#" th:href="@{/users/login}" class="btn btn-primary btn-lg" role="button">Log in</a>
+    <a href="#" th:href="@{/login}" class="btn btn-primary btn-lg" role="button">Log in</a>
 </div>
 <script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>

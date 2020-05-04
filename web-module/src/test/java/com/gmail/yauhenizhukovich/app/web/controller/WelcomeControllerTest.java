@@ -24,4 +24,10 @@ class WelcomeControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void getLoginPage_returnStatusOk() throws Exception {
+        mockMvc.perform(get("/login"))
+                .andExpect(status().isOk());
+    }
+
 }

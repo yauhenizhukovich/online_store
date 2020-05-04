@@ -1,4 +1,4 @@
-package com.gmail.yauhenizhukovich.app.service.model;
+package com.gmail.yauhenizhukovich.app.service.model.user;
 
 public enum RoleEnumService {
     ADMINISTRATOR,

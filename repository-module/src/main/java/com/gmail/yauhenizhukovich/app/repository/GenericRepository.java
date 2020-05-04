@@ -6,7 +6,7 @@ public interface GenericRepository<I, T> {
 
     T add(T t);
 
-    void delete(T t);
+    boolean delete(T t);
 
     T getById(I id);
 

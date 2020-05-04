@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
 </head>
 <body>
-<h1 class="display-4 text-center"><strong>USER</strong></h1>
+<h1 class="display-4 font-italic text-center"><strong>PROFILE</strong></h1>
 <div class="container">
     <div class="row">
         <div class="col-sm" th:object="${user}">
@@ -21,54 +21,67 @@
                 <dt class="col-sm-3">Telephone:</dt>
                 <dd class="col-sm-9" th:text="${user.telephone}">Not defined</dd>
             </dl>
-            <form action="#" th:action="@{/users/{uniqueNumber}(uniqueNumber=${user.uniqueNumber}, destination='profile')}"
-                  method="post">
-                <input type="submit" class="btn btn-primary" value="Generate new password"/>
-            </form>
             <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
         </div>
         <div class="col-sm" th:object="${updatedUser}">
-            <form action="#" th:action="@{/users/profile}" method="post">
-                <div th:unless="${#fields.hasErrors('firstName')}">
-                    Change first name: <input type="text" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"
-                                              th:value="*{firstName}"><br>
+            <form action="#" th:action="@{/profile}" method="post">
+
+                <div th:unless="${#fields.hasErrors('firstName')}" class="form-group">
+                    <label for="firstNameInput" class="font-weight-normal">Change first name:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"
+                           th:value="*{firstName}" id="firstNameInput">
                 </div>
-                <div th:if="${#fields.hasErrors('firstName')}">
-                    Change first name: <input type="text" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"><br>
+                <div th:if="${#fields.hasErrors('firstName')}" class="form-group">
+                    <label for="firstNameInput" class="font-weight-normal">Change first name:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"
+                           id="firstNameInput">
                 </div>
-                <div th:unless="${#fields.hasErrors('lastName')}">
-                    Change last name: <input type="text" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="lastName"
-                                             th:value="*{lastName}"><br>
+
+                <div th:unless="${#fields.hasErrors('lastName')}" class="form-group">
+                    <label for="lastNameInput" class="font-weight-normal">Change last name:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="lastName"
+                           th:value="*{lastName}" id="lastNameInput">
                 </div>
-                <div th:if="${#fields.hasErrors('lastName')}">
-                    Change last name: <input type="text" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="lastName"><br>
+                <div th:if="${#fields.hasErrors('lastName')}" class="form-group">
+                    <label for="lastNameInput" class="font-weight-normal">Change last name:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="lastName"
+                           id="lastNameInput">
                 </div>
-                <div th:unless="${#fields.hasErrors('address')}">
-                    Change address:
-                    <input type="text" minlength="2" maxlength="100" pattern="^[a-zA-Z0-9 ,.]*$" name="address"
-                           th:value="*{address}"><br>
+
+                <div th:unless="${#fields.hasErrors('address')}" class="form-group">
+                    <label for="addressInput" class="font-weight-normal">Change address:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="100" pattern="^[a-zA-Z0-9 ,.]*$" name="address"
+                           th:value="*{address}" id="addressInput">
                 </div>
-                <div th:if="${#fields.hasErrors('address')}">
-                    <input type="text" minlength="2" maxlength="100" pattern="^[a-zA-Z0-9 ,.]*$" name="address"><br>
+                <div th:if="${#fields.hasErrors('address')}" class="form-group">
+                    <label for="addressInput" class="font-weight-normal">Change address:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="100" pattern="^[a-zA-Z0-9 ,.]*$" name="address"
+                           id="addressInput">
                 </div>
-                <div th:unless="${#fields.hasErrors('telephone')}">
-                    Change telephone: <input type="text" minlength="2" maxlength="40" name="telephone"
-                                             th:value="*{telephone}">
+
+                <div th:unless="${#fields.hasErrors('telephone')}" class="form-group">
+                    <label for="telephoneInput" class="font-weight-normal">Change telephone:</label>
+                    <input type="tel" class="form-control" minlength="2" maxlength="100" pattern="^[a-zA-Z0-9 ,.]*$" name="telephone"
+                           th:value="*{telephone}" id="telephoneInput">
                 </div>
-                <div th:if="${#fields.hasErrors('telephone')}">
-                    Change telephone: <input type="text" minlength="2" maxlength="40" name="telephone">
+                <div th:if="${#fields.hasErrors('telephone')}" class="form-group">
+                    <label for="telephoneInput" class="font-weight-normal">Change telephone:</label>
+                    <input type="tel" class="form-control" minlength="2" maxlength="100" pattern="^[a-zA-Z0-9 ,.]*$" name="telephone"
+                           id="telephoneInput">
                 </div>
-                <input type="hidden" name="patronymic" th:value="*{patronymic}">
-                <input type="hidden" name="role" th:value="*{role}">
-                <input type="hidden" name="email" th:value="*{email}">
+                <div class="form-group">
+                    <label for="passwordInput" class="font-weight-bold lead">Reset password</label>
+                    <input type="checkbox" name="updatePassword" id="passwordInput"/>
+                </div>
                 <input type="submit" class="btn btn-primary" value="Accept changes">
             </form>
-            <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"/>
-            <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"/>
-            <div th:if="${#fields.hasErrors('address')}" th:errors="*{address}"/>
-            <div th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}"/>
         </div>
-        <div class="col-sm">
+        <div class="col-sm" th:object="${updatedUser}">
+            <div class="alert alert-info" th:if="${updatePassword ne null}" th:text="${updatePassword}"/>
+            <div class="alert alert-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"/>
+            <div class="alert alert-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"/>
+            <div class="alert alert-danger" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"/>
+            <div class="alert alert-danger" th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}"/>
         </div>
     </div>
 </div>

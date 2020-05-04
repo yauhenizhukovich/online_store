@@ -13,11 +13,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "article")
 public class Article {
 
     @Id
@@ -27,11 +26,9 @@ public class Article {
     @Column
     private String title;
     @Column
-    private String rundown;
+    private String content;
     @Column
     private LocalDate date;
-    @OneToOne(mappedBy = "article", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private ArticleDetails articleDetails;
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
@@ -55,28 +52,12 @@ public class Article {
         this.author = author;
     }
 
-    public ArticleDetails getArticleDetails() {
-        return articleDetails;
-    }
-
-    public void setArticleDetails(ArticleDetails articleDetails) {
-        this.articleDetails = articleDetails;
-    }
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getRundown() {
-        return rundown;
-    }
-
-    public void setRundown(String rundown) {
-        this.rundown = rundown;
     }
 
     public LocalDate getDate() {
@@ -95,6 +76,14 @@ public class Article {
         this.title = title;
     }
 
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -106,16 +95,14 @@ public class Article {
         Article article = (Article) o;
         return Objects.equals(id, article.id) &&
                 Objects.equals(title, article.title) &&
-                Objects.equals(rundown, article.rundown) &&
+                Objects.equals(content, article.content) &&
                 Objects.equals(date, article.date) &&
-                Objects.equals(articleDetails, article.articleDetails) &&
-                Objects.equals(author, article.author) &&
                 Objects.equals(comments, article.comments);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, rundown, date, articleDetails, author, comments);
+        return Objects.hash(id, title, content, date, comments);
     }
 
 }

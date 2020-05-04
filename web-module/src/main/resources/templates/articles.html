@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
     <title>Articles</title>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
@@ -7,49 +8,52 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
 </head>
 <body>
-<h1 class="display-4 text-center"><strong>ARTICLES</strong></h1>
+<h1 class="display-4 font-italic text-center"><strong>ARTICLES</strong></h1>
 <div class="col" th:if="${not #lists.isEmpty(articles)}">
-    <table class="table table-bordered text-center">
-        <thead>
-        <tr>
-            <td scope="col">#</td>
-            <td scope="col">Date</td>
-            <td scope="col">Title</td>
-            <td scope="col">Author name</td>
-            <td scope="col">Rundown</td>
-            <td></td>
-        </tr>
-        </thead>
+    <table class="table table-borderless">
         <tbody>
         <tr th:each="article, status : ${articles}">
-            <td scope="row" th:text="${status.count}"></td>
-            <td th:text="${article.date}">Date not defined</td>
-            <td th:text="${article.title}">Title not defined</td>
-            <td th:text="${article.authorFirstName + ' ' + article.authorLastName}">Author not defined</td>
-            <td th:text="${article.rundown}">Rundown not defined</td>
+            <td class="font-weight-bold" th:text="${status.count}"></td>
+            <td class="font-weight-bold">
+                <div th:text="${article.date}">Date not defined</div>
+            </td>
+            <td class="font-weight-bold col-sm-2">
+                <div th:text="${article.title}">Title not defined</div>
+                <div th:text="${article.authorFirstName + ' ' + article.authorLastName}">Author not defined</div>
+            </td>
+            <td th:text="${article.rundown}">
+                Rundown not defined
+            </td>
             <td>
                 <a th:href="@{/articles/{id}(id=${article.id})}" class="btn btn-success"
                    role="button">Full article</a>
             </td>
+            <td th:if="${#authorization.expression('hasRole(''SALE_USER'')')}">
+                <form th:action="@{/articles/{id}/delete(id=${article.id})}" method="post">
+                    <input type="submit" class="btn btn-primary" value="Delete article"/>
+                </form>
+            </td>
         </tr>
         </tbody>
     </table>
-    <div th:if="${#lists.size(pages) gt 1}" class="text-center">
-        Pages<br>
-        <div class="btn-group mr-2 text-center" role="group">
-            <div th:each="page : ${pages}">
-                <a th:href="@{/articles(page=${page})}" th:text="${page}" th:value="${page}"
-                   class="btn btn-secondary"
-                   role="button">Page Number</a>
-            </div>
-        </div>
-    </div>
+    <nav th:if="${pages gt 1}">
+        <ul class="pagination justify-content-center">
+            <li th:each="page: ${#numbers.sequence(1, pages)}" class="page-item active">
+                <a class="page-link" th:name="'page' + ${page}" th:href="@{/articles(page=${page})}" th:text="${page}"
+                   th:value="${page}"/>
+            </li>
+        </ul>
+    </nav>
     <br>
     <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    <a th:if="${#authorization.expression('hasRole(''SALE_USER'')')}" th:href="@{/articles/add}" class="btn btn-primary" role="button">Add
+        new article</a>
 </div>
 <div class="lead text-center" th:unless="${not #lists.isEmpty(articles)}">
     <p>There are no articles...</p>
     <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    <a th:if="${#authorization.expression('hasRole(''SALE_USER'')')}" th:href="@{/articles/add}" class="btn btn-primary" role="button">Add
+        new article</a>
 </div>
 <script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>

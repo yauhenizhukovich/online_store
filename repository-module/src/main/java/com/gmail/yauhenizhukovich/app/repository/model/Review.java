@@ -10,15 +10,15 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "review")
 public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
-    @Column(name = "full_name")
-    private String fullName;
+    @Column(name = "author_name")
+    private String authorName;
     @Column(name = "review_text")
     private String reviewText;
     @Column
@@ -34,12 +34,12 @@ public class Review {
         this.id = id;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getAuthorName() {
+        return authorName;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setAuthorName(String fullName) {
+        this.authorName = fullName;
     }
 
     public String getReviewText() {
@@ -77,14 +77,13 @@ public class Review {
         Review review = (Review) o;
         return active == review.active &&
                 Objects.equals(id, review.id) &&
-                Objects.equals(fullName, review.fullName) &&
                 Objects.equals(reviewText, review.reviewText) &&
                 Objects.equals(date, review.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fullName, reviewText, date, active);
+        return Objects.hash(id, reviewText, date, active);
     }
 
 }

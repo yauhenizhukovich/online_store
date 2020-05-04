@@ -7,52 +7,75 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
 </head>
 <body>
-<h1 class="display-4 text-center" th:text="${'USER ' + user.email}"><strong>USER</strong></h1>
-<dl class="row">
-    <dt class="col-sm-3">Unique number:</dt>
-    <dd class="col-sm-9" th:text="${user.uniqueNumber}">Not defined</dd>
+<div th:if="${user eq null}">
+    <h1 class="display-4 font-italic text-center"><strong>THIS USER DOESNT EXIST</strong></h1>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<div th:unless="${user eq null}">
+    <div class="container" th:object="${user}">
+        <div class="row">
+            <div class="col-sm">
+                <h1 class="display-5 text-center font-italic" th:text="*{'User ' + email}"><strong>ADD USER</strong></h1>
+            </div>
+            <div class="col-sm"></div>
+        </div>
+    </div>
+    <div class="col-sm" th:object="${user}">
+        <dl class="row font-italic lead">
 
-    <dt class="col-sm-3">First name:</dt>
-    <dd class="col-sm-9" th:text="${user.firstName}">Not defined</dd>
+            <dt class="col-sm-3">First name:</dt>
+            <dd class="col-sm-9" th:text="*{firstName}">Not defined</dd>
 
-    <dt class="col-sm-3">Last name:</dt>
-    <dd class="col-sm-9" th:text="${user.lastName}">Not defined</dd>
+            <dt class="col-sm-3">Last name:</dt>
+            <dd class="col-sm-9" th:text="*{lastName}">Not defined</dd>
 
-    <dt class="col-sm-3">Patronymic:</dt>
-    <dd class="col-sm-9" th:text="${user.patronymic}">Not defined</dd>
+            <dt class="col-sm-3">Patronymic:</dt>
+            <dd class="col-sm-9" th:text="*{patronymic}">Not defined</dd>
 
-    <dt class="col-sm-3">Email:</dt>
-    <dd class="col-sm-9" th:text="${user.email}">Not defined</dd>
+            <dt class="col-sm-3">Email:</dt>
+            <dd class="col-sm-9" th:text="*{email}">Not defined</dd>
 
-    <dt class="col-sm-3">Role:</dt>
-    <dd class="col-sm-9" th:text="${user.role}">Not defined</dd>
-
-    <dt class="col-sm-3"></dt>
-    <dd class="col-sm-9">
-        <form action="#" th:action="@{/users/{uniqueNumber}(uniqueNumber=${uniqueNumber})}" method="post">
-            <input type="submit" class="btn btn-primary" value="Change role"/>
-            <select name="role">
-                <option th:each="role : ${roles}" th:text="${#strings.replace(role,'_',' ').toLowerCase()}"
-                        th:value="${role}">
-                    Role
-                </option>
-            </select>
-        </form>
-    </dd>
-</dl>
-<div th:if="${roleMessage ne null}" th:text="${roleMessage}"></div>
-<div th:if="${passwordMessage ne null}" th:text="${passwordMessage}"></div>
-<form action="#" th:action="@{/users/{uniqueNumber}(uniqueNumber=${user.uniqueNumber}, destination='user')}"
-      method="post">
-    <input type="submit" class="btn btn-primary" value="Generate new password"/>
-</form>
-<form action="#" th:action="@{/users/delete(uniqueNumbers=${user.uniqueNumber})}"
-      method="post">
-    <input type="submit" class="btn btn-primary" value="Delete user"/>
-</form>
-<a th:href="@{/users/add}" class="btn btn-primary" role="button">Add new user</a>
-<a th:href="@{/users}" class="btn btn-primary" role="button">Back to users page</a>
-<a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+            <dt class="col-sm-3">Role:</dt>
+            <dd class="col-sm-9" th:text="*{
+                                #strings.substring(role,0,1)
+                                .concat(#strings.substring(role,1)
+                                .toLowerCase()
+                                .replace('_',' '))
+                                }">Not defined
+            </dd>
+        </dl>
+    </div>
+    <form action="#" th:action="@{/users/{uniqueNumber}(uniqueNumber=${uniqueNumber})}" method="post">
+        <div class="col-sm">
+            <div class="form-group">
+                <label for="roleInput" class="font-weight-bold lead">Set new role</label>
+                <select name="role" class="form-control col-sm-2" id="roleInput">
+                    <option th:each="role : ${roles}"
+                            th:text="${
+                                #strings.substring(role,0,1)
+                                .concat(#strings.substring(role,1)
+                                .toLowerCase()
+                                .replace('_',' '))
+                                }"
+                            th:value="${role}"/>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="passwordInput" class="font-weight-bold lead">Reset password</label>
+                <input type="checkbox" name="updatePassword" id="passwordInput"/>
+            </div>
+            <div class="col-sm-3 alert alert-info text-left" th:if="${message ne null}" th:text="${message}"/>
+            <div class="col-sm-3 alert alert-danger text-left" th:if="${error ne null}" th:text="${error}"/>
+            <input type="submit" class="btn btn-success" value="Update user"/>
+        </div>
+    </form>
+    <br>
+    <div class="col-sm">
+        <a th:href="@{/users/add}" class="btn btn-primary" role="button">Add new user</a>
+        <a th:href="@{/users}" class="btn btn-primary" role="button">Back to users</a>
+        <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    </div>
+</div>
 <script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
 </body>

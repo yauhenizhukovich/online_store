@@ -11,4 +11,9 @@ public class WelcomeController {
         return "welcome";
     }
 
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
+
 }

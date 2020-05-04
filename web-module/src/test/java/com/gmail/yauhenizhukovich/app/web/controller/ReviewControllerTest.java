@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.gmail.yauhenizhukovich.app.service.ReviewService;
-import com.gmail.yauhenizhukovich.app.service.model.ReviewDTO;
+import com.gmail.yauhenizhukovich.app.service.model.review.ReviewDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ class ReviewControllerTest {
         mockMvc.perform(get("/reviews")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE))).andExpect(status().isOk());
-        verify(reviewService, times(1)).getPages();
+        verify(reviewService, times(1)).getCountOfPages();
         verify(reviewService, times(1)).getReviewsByPage(eq(PAGE));
     }
 
@@ -102,12 +102,14 @@ class ReviewControllerTest {
 
     @Test
     void updateReviews_callBusinessLogic() throws Exception {
-        Long[] ids = new Long[] {2L, 5L};
+        List<Long> ids = new ArrayList<>();
+        ids.add(2L);
+        ids.add(5L);
         mockMvc.perform(post("/reviews")
-                .param("ids", String.valueOf(ids[0]))
-                .param("ids", String.valueOf(ids[1]))
+                .param("ids", String.valueOf(ids.get(0)))
+                .param("ids", String.valueOf(ids.get(1)))
         ).andExpect(redirectedUrl("/reviews"));
-        verify(reviewService, times(1)).updateActivityByIds(eq(ids));
+        verify(reviewService, times(1)).updateStatusByIds(eq(ids));
     }
 
     @Test
@@ -132,7 +134,7 @@ class ReviewControllerTest {
 
     private ReviewDTO getReview() {
         ReviewDTO review = new ReviewDTO();
-        review.setFullName(VALID_FULL_NAME);
+        review.setAuthorName(VALID_FULL_NAME);
         review.setReviewText(VALID_REVIEW_TEXT);
         review.setDate(VALID_DATE);
         review.setActive(VALID_ACTIVE);

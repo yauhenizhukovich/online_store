@@ -3,7 +3,7 @@ package com.gmail.yauhenizhukovich.app.web.controller;
 import java.util.List;
 
 import com.gmail.yauhenizhukovich.app.service.ReviewService;
-import com.gmail.yauhenizhukovich.app.service.model.ReviewDTO;
+import com.gmail.yauhenizhukovich.app.service.model.review.ReviewDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,27 +21,29 @@ public class ReviewController {
     public ReviewController(ReviewService reviewService) {this.reviewService = reviewService;}
 
     @GetMapping
-    public String getReviews(@RequestParam(required = false) Integer page, Model model) {
-        if (page == null) {
-            page = 1;
-        }
+    public String getReviews(
+            @RequestParam(defaultValue = "1") Integer page,
+            Model model
+    ) {
         List<ReviewDTO> reviews = reviewService.getReviewsByPage(page);
         model.addAttribute("reviews", reviews);
-        List<Integer> pages = reviewService.getPages();
-        model.addAttribute("pages", pages);
+        int countOfPages = reviewService.getCountOfPages();
+        model.addAttribute("pages", countOfPages);
         return "reviews";
     }
 
     @PostMapping
-    public String updateReviews(@RequestParam(required = false) Long[] ids) {
-        if (ids != null) {
-            reviewService.updateActivityByIds(ids);
-        }
+    public String updateReviewsStatus(
+            @RequestParam(defaultValue = "") List<Long> ids
+    ) {
+        reviewService.updateStatusByIds(ids);
         return "redirect:/reviews";
     }
 
     @PostMapping("/{id}")
-    public String deleteReviewById(@PathVariable Long id) {
+    public String deleteReview(
+            @PathVariable Long id
+    ) {
         reviewService.deleteReviewById(id);
         return "redirect:/reviews";
     }

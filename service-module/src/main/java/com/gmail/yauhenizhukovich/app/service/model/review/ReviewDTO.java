@@ -1,21 +1,21 @@
-package com.gmail.yauhenizhukovich.app.service.model;
+package com.gmail.yauhenizhukovich.app.service.model.review;
 
 import java.time.LocalDate;
 
 public class ReviewDTO {
 
     private Long id;
-    private String fullName;
+    private String authorName;
     private String reviewText;
     private LocalDate date;
     private boolean active;
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getAuthorName() {
+        return authorName;
     }
 
     public void setReviewText(String reviewText) {
