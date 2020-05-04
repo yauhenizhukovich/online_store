@@ -14,6 +14,6 @@ public interface GenericRepository<I, T> {
 
     List<T> getAll();
 
-    List<T> getObjectsByStartPositionAndMaxResult(int startPosition, int maxResult);
+    List<T> getPaginatedObjects(int startPosition, int maxResult);
 
 }

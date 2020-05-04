@@ -2,16 +2,19 @@ package com.gmail.yauhenizhukovich.app.service;
 
 import java.util.List;
 
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
+import com.gmail.yauhenizhukovich.app.service.model.review.AddReviewDTO;
 import com.gmail.yauhenizhukovich.app.service.model.review.ReviewDTO;
+import com.gmail.yauhenizhukovich.app.service.model.review.ReviewsDTO;
 
 public interface ReviewService {
 
-    List<ReviewDTO> getReviewsByPage(Integer page);
-
-    int getCountOfPages();
+    ObjectsDTOAndPagesEntity<ReviewsDTO> getReviewsByPage(Integer page);
 
     boolean deleteReviewById(Long id);
 
-    List<ReviewDTO> updateStatusByIds(List<Long> ids);
+    List<ReviewsDTO> updateStatusByIds(List<Long> ids);
+
+    ReviewDTO addReview(AddReviewDTO reviewText);
 
 }

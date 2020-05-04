@@ -3,17 +3,15 @@ package com.gmail.yauhenizhukovich.app.service;
 import java.util.List;
 
 import com.gmail.yauhenizhukovich.app.service.exception.AnonymousUserException;
-import com.gmail.yauhenizhukovich.app.service.exception.UserAccessDeniedException;
-import com.gmail.yauhenizhukovich.app.service.model.article.UpdateArticleDTO;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
 import com.gmail.yauhenizhukovich.app.service.model.article.AddArticleDTO;
 import com.gmail.yauhenizhukovich.app.service.model.article.ArticleDTO;
 import com.gmail.yauhenizhukovich.app.service.model.article.ArticlesDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.UpdateArticleDTO;
 
 public interface ArticleService {
 
-    List<ArticlesDTO> getArticlesByPage(Integer pageNumber);
-
-    int getCountOfPages();
+    ObjectsDTOAndPagesEntity<ArticlesDTO> getArticlesByPage(Integer pageNumber);
 
     ArticleDTO getArticleById(Long id);
 
@@ -21,7 +19,7 @@ public interface ArticleService {
 
     boolean deleteArticleById(Long id);
 
-    ArticleDTO addArticle(AddArticleDTO article) throws AnonymousUserException, UserAccessDeniedException;
+    ArticleDTO addArticle(AddArticleDTO article) throws AnonymousUserException;
 
     ArticleDTO updateArticle(UpdateArticleDTO updatedArticle);
 

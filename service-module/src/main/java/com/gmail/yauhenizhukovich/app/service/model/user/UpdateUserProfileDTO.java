@@ -5,22 +5,22 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.ADDRESS_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.FIRSTNAME_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.FIRSTNAME_SIZE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.LASTNAME_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.LASTNAME_SIZE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NOT_EMPTY_FIRSTNAME_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NOT_EMPTY_LASTNAME_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NOT_NULL_ADDRESS_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NOT_NULL_TELEPHONE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.TELEPHONE_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.ADDRESS_PATTERN;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_FIRSTNAME_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_LASTNAME_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MIN_NAME_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.NAME_PATTERN;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.TELEPHONE_PATTERN;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.ADDRESS_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.FIRSTNAME_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.FIRSTNAME_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.LASTNAME_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.LASTNAME_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.NOT_EMPTY_FIRSTNAME_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.NOT_EMPTY_LASTNAME_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.NOT_NULL_ADDRESS_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.NOT_NULL_TELEPHONE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.TELEPHONE_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.ADDRESS_PATTERN;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MAX_FIRSTNAME_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MAX_LASTNAME_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MIN_NAME_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.NAME_PATTERN;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.TELEPHONE_PATTERN;
 
 public class UpdateUserProfileDTO {
 

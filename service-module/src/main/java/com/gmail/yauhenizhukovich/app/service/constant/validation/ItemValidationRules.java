@@ -1,4 +1,4 @@
-package com.gmail.yauhenizhukovich.app.service.constant;
+package com.gmail.yauhenizhukovich.app.service.constant.validation;
 
 public interface ItemValidationRules {
 

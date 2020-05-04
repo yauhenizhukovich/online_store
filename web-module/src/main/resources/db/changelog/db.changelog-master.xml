@@ -67,7 +67,7 @@
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
             <column name="date" type="DATE"/>
-            <column name="title" type="VARCHAR(40)"/>
+            <column name="title" type="VARCHAR(100)"/>
             <column name="content" type="TEXT(1000)"/>
             <column name="author_id" type="BIGINT">
                 <constraints foreignKeyName="author_id" references="user(id)" nullable="false"/>
@@ -105,7 +105,7 @@
 
     <changeSet id="10" author="yauhenizhukovich@gmail.com">
         <insert tableName="user">
-            <column name="unique_number" value="daec484c-4df4-4b13-a59a-8b2b5f4e7586 "/>
+            <column name="unique_number" value="daec484c-4df4-4b13-a59a-8b2b5f4e7586"/>
             <column name="email" value="customer@gmail.com"/>
             <column name="password" value="$2y$12$grwkOBtozjFyhoUpS1Qj3.UxNfi6iud3FEJLKRd..JOLND83B31Oy"/>
             <column name="role" value="CUSTOMER_USER"/>
@@ -155,7 +155,7 @@
 
     <changeSet id="15" author="yauhenizhukovich@gmail.com">
         <insert tableName="user">
-            <column name="unique_number" value="daec484c-4df4-4b53-a59a-8b2b5f4e7586 "/>
+            <column name="unique_number" value="daec484c-4df4-4b53-a59a-8b2b5f4e7586"/>
             <column name="email" value="sale@gmail.com"/>
             <column name="password" value="$2y$12$GFtiuWWjJTCOnHlXSJNV4.dkeQDisCml.Pa0C.8IrNrVz2Qlhfgym"/>
             <column name="role" value="SALE_USER"/>
@@ -175,7 +175,7 @@
 
     <changeSet id="17" author="yauhenizhukovich@gmail.com">
         <insert tableName="user">
-            <column name="unique_number" value="dagc484c-4df4-4b53-a59a-8b2b5f4e7586 "/>
+            <column name="unique_number" value="dagc484c-4df4-4b53-a59a-8b2b5f4e7586"/>
             <column name="email" value="secure@gmail.com"/>
             <column name="password" value="$2y$12$4Hzpd/3fSEjq2rU6e0VQmuTUaPixbJll6SvyQh7DvMehQl.dm0y1K"/>
             <column name="role" value="SECURE_API_USER"/>
@@ -191,6 +191,83 @@
             <column name="address" value="LA, ul. Beach, 7"/>
             <column name="telephone" value="8029529139"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="19" author="yauhenizhukovich@gmail.com">
+        <createTable tableName="ordering">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="date" type="DATE"/>
+            <column name="status" type="VARCHAR(20)"/>
+            <column name="amount" type="INT(5)"/>
+            <column name="price" type="DEC(10,3)"/>
+            <column name="ordered_item_id" type="BIGINT">
+                <constraints foreignKeyName="ordered_item_id" references="item(id)"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints foreignKeyName="customer_id" references="user(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20" author="yauhenizhukovich@gmail.com">
+        <dropNotNullConstraint tableName="article" columnName="author_id" columnDataType="BIGINT"/>
+    </changeSet>
+
+    <changeSet id="21" author="yauhenizhukovich@gmail.com">
+        <insert tableName="article">
+            <column name="date" value="2020-04-20"/>
+            <column name="title" value="Zoom meetings, Uber Eats and home workouts: ‘Lockdown’ life in Dubai"/>
+            <column name="content" value="Zoom meetings, Uber Eats and home workouts have become an essential part of our daily lives due to COVID-19 movement restrictions.
+
+Wildlife has flourished over the past two months and has been appearing in towns and cities around the globe. Pollution levels have dropped and air quality has improved due to grounded flights and fewer cars on the roads. Transport has stagnated and in some parts of the world, it has even come to a standstill. However, people in Dubai and around the world have been keeping very active in their homes whilst self-isolating.
+
+The ‘home workout’ has seen people push creativity and innovation in order to create personal gyms. Water bottle weights and towel resistance bands have been used to keep the calories at bay. When commenting on the home workout craze, UK celebrity fitness coach, Joe Wicks said:"/>
+            <column name="author_id" value="2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="22" author="yauhenizhukovich@gmail.com">
+        <insert tableName="comment">
+            <column name="date" value="2020-02-23"/>
+            <column name="content" value="Good news everyone!"/>
+            <column name="author_id" value="2"/>
+            <column name="article_id" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="23" author="yauhenizhukovich@gmail.com">
+        <insert tableName="comment">
+            <column name="date" value="2020-02-24"/>
+            <column name="content" value="Oh, i think that's bad idea..."/>
+            <column name="author_id" value="1"/>
+            <column name="article_id" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="24" author="yauhenizhukovich@gmail.com">
+        <delete tableName="user_details">
+            <where>user_id=(SELECT id FROM user WHERE email = 'sale@gmail.com')</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="25" author="yauhenizhukovich@gmail.com">
+        <delete tableName="user_details">
+            <where>user_id=(SELECT id FROM user WHERE email = 'secure@gmail.com')</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="26" author="yauhenizhukovich@gmail.com">
+        <delete tableName="user">
+            <where>email='sale@gmail.com'</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="27" author="yauhenizhukovich@gmail.com">
+        <delete tableName="user">
+            <where>email='secure@gmail.com'</where>
+        </delete>
     </changeSet>
 
 </databaseChangeLog>

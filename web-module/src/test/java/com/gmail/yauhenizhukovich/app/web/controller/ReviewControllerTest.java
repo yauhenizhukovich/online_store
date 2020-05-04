@@ -5,18 +5,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.gmail.yauhenizhukovich.app.service.ReviewService;
-import com.gmail.yauhenizhukovich.app.service.model.review.ReviewDTO;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
+import com.gmail.yauhenizhukovich.app.service.model.review.ReviewsDTO;
+import com.gmail.yauhenizhukovich.app.web.controller.config.UnitTestConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.PAGE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.PAGES;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_ACTIVE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_AUTHOR_FIRSTNAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_DATE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_FULL_NAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_ID;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_LAST_NAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_REVIEW_TEXT;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,32 +38,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ReviewController.class)
+@Import(UnitTestConfig.class)
 @WithMockUser(roles = "ADMINISTRATOR")
 class ReviewControllerTest {
 
-    private static final int PAGE = 3;
-    private static final String VALID_FULL_NAME = "Sidorov Ivan Petrovich";
-    private static final String VALID_REVIEW_TEXT = "This is test review example.";
-    private static final LocalDate VALID_DATE = LocalDate.now();
-    private static final boolean VALID_ACTIVE = true;
-    private static final long VALID_ID = 12L;
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private ReviewService reviewService;
-    @MockBean
-    private UserDetailsService userDetailsService;
 
     @Test
     void getReviews_returnStatusOk() throws Exception {
-        mockMvc.perform(get("/reviews")).andExpect(status().isOk());
-    }
-
-    @Test
-    void getReviewsWithParam_returnStatusOk() throws Exception {
+        ObjectsDTOAndPagesEntity<ReviewsDTO> reviewsAndPages = getReviews();
+        when(reviewService.getReviewsByPage(eq(PAGE))).thenReturn(reviewsAndPages);
         mockMvc.perform(get("/reviews")
-                .contentType(MediaType.TEXT_HTML)
-                .param("page", String.valueOf(PAGE))).andExpect(status().isOk());
+                .param("page", String.valueOf(PAGE)))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -64,17 +65,18 @@ class ReviewControllerTest {
 
     @Test
     void getReviews_callBusinessLogic() throws Exception {
+        ObjectsDTOAndPagesEntity<ReviewsDTO> reviewsAndPages = getReviews();
+        when(reviewService.getReviewsByPage(eq(PAGE))).thenReturn(reviewsAndPages);
         mockMvc.perform(get("/reviews")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE))).andExpect(status().isOk());
-        verify(reviewService, times(1)).getCountOfPages();
         verify(reviewService, times(1)).getReviewsByPage(eq(PAGE));
     }
 
     @Test
     void getReviews_returnReviews() throws Exception {
-        List<ReviewDTO> reviews = getOneReviewList();
-        when(reviewService.getReviewsByPage(PAGE)).thenReturn(reviews);
+        ObjectsDTOAndPagesEntity<ReviewsDTO> reviewsAndPages = getOneReviewList();
+        when(reviewService.getReviewsByPage(PAGE)).thenReturn(reviewsAndPages);
         MvcResult result = mockMvc.perform(get("/reviews")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE))).andReturn();
@@ -125,20 +127,30 @@ class ReviewControllerTest {
         verify(reviewService, times(1)).deleteReviewById(eq(VALID_ID));
     }
 
-    private List<ReviewDTO> getOneReviewList() {
-        List<ReviewDTO> reviews = new ArrayList<>();
-        ReviewDTO review = getReview();
+    private ObjectsDTOAndPagesEntity<ReviewsDTO> getOneReviewList() {
+        List<ReviewsDTO> reviews = new ArrayList<>();
+        ReviewsDTO review = getReview();
         reviews.add(review);
-        return reviews;
+        return new ObjectsDTOAndPagesEntity<>(PAGES, reviews);
     }
 
-    private ReviewDTO getReview() {
-        ReviewDTO review = new ReviewDTO();
+    private ReviewsDTO getReview() {
+        ReviewsDTO review = new ReviewsDTO();
         review.setAuthorName(VALID_FULL_NAME);
         review.setReviewText(VALID_REVIEW_TEXT);
         review.setDate(VALID_DATE);
         review.setActive(VALID_ACTIVE);
         return review;
+    }
+
+    private ObjectsDTOAndPagesEntity<ReviewsDTO> getReviews() {
+        List<ReviewsDTO> reviews = new ArrayList<>();
+        ReviewsDTO review = new ReviewsDTO();
+        review.setReviewText(VALID_REVIEW_TEXT);
+        review.setAuthorName(VALID_AUTHOR_FIRSTNAME + " " + VALID_LAST_NAME);
+        review.setDate(LocalDate.now());
+        reviews.add(review);
+        return new ObjectsDTOAndPagesEntity<>(PAGES, reviews);
     }
 
 }

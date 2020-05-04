@@ -5,9 +5,19 @@
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+    <style>
+        .common-row input[type="file"] {
+            display: none;
+        }
+        .common-row input[type="file"] + label {
+            background: #eee;
+            padding: 5px 10px;
+            display: inline;
+        }
+    </style>
 </head>
 <body>
-<h1 class="display-4 text-center"><strong>ITEMS</strong></h1>
+<h1 class="display-4 text-center font-italic"><strong>ITEMS</strong></h1>
 <div class="col" th:if="${not #lists.isEmpty(items)}">
     <table class="table table-bordered text-center">
         <thead>
@@ -18,25 +28,42 @@
             <td scope="col">Price</td>
             <td></td>
             <td></td>
-            <td></td>
+            <td th:if="${#authorization.expression('hasRole(''SALE_USER'')')}"></td>
         </tr>
         </thead>
         <tbody>
         <tr th:each="item, status : ${items}">
             <td scope="row" th:text="${status.count}"></td>
-            <td th:text="${item.name}">Name not defined</td>
+            <td>
+                <div th:unless="${#strings.equals(param.copy, item.uniqueNumber)}" th:text="${item.name}">
+                    Name not defined
+                </div>
+                <div th:if="${#strings.equals(param.copy, item.uniqueNumber)}">
+                    <form action="#" th:action="@{/items/{id}/copy(id=${item.id})}" method="post">
+                        Enter name: <input type="text" class="form-group col-sm-3" name="name" autofocus/>
+                        <input type="submit" class="btn btn-secondary btn-sm" value="Confirm"/>
+                    </form>
+                </div>
+            </td>
             <td th:text="${item.uniqueNumber}">Review text not defined</td>
             <td th:text="${item.price}">Date not defined</td>
             <td>
                 <a th:href="@{/items/{id}(id=${item.id})}" class="btn btn-info"
-                   role="button">Full item</a>
+                   role="button">Item details</a>
             </td>
             <td>
-                <form action="#" th:action="@{/items/{id}/copy(id=${item.id})}" method="post">
+                <form th:if="${#authorization.expression('hasRole(''CUSTOMER_USER'')')}" action="#"
+                      th:action="@{/orders}" method="post">
+                    <input type="hidden" name="itemUniqueNumber" th:value="${item.uniqueNumber}">
+                    Amount: <input class="form-group col-sm-2" type="number" min="1" max="1000" th:value="1" name="amount"/>
+                    <input type="submit" class="btn btn-success" value="Order items"/>
+                </form>
+                <form th:if="${#authorization.expression('hasRole(''SALE_USER'')')}" action="#"
+                      th:action="@{/items/{id}/copy(id=${item.id})}" method="post">
                     <input type="submit" class="btn btn-success" value="Copy item"/>
                 </form>
             </td>
-            <td>
+            <td th:if="${#authorization.expression('hasRole(''SALE_USER'')')}">
                 <form action="#" th:action="@{/items/{id}(id=${item.id})}" method="post">
                     <input type="submit" class="btn btn-danger" value="Delete item"/>
                 </form>
@@ -53,10 +80,38 @@
         </ul>
     </nav>
     <br>
+    <div th:unless="${#authorization.expression('hasRole(''CUSTOMER_USER'')')}">
+        <form method="post" th:action="@{/items/upload}" enctype="multipart/form-data">
+            <div class="common-row">
+                <input type="file" id="file" name="file">
+                <label class="common-label btn btn-primary text-black-50" for="file">
+                    Click here to choose upload file
+                </label>
+            </div>
+            <br>
+            <input type="submit" value="Upload" class="btn btn-success"/>
+        </form>
+    </div>
+    <br>
+    <div class="col-sm-3 alert alert-info text-left" th:if="${message ne null}" th:text="${message}"/>
     <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
 </div>
 <div class="lead text-center" th:unless="${not #lists.isEmpty(items)}">
     <p>There are no items...</p>
+    <p class="alert alert-danger" th:if="${message ne null}" th:text="${message}"></p>
+    <div th:unless="${#authorization.expression('hasRole(''CUSTOMER_USER'')')}">
+        <form method="post" th:action="@{/items/upload}" enctype="multipart/form-data">
+            <div class="common-row">
+                <input type="file" id="file" name="file">
+                <label class="common-label btn btn-primary text-black-50" for="file">
+                    Click here to choose upload file (only xml)
+                </label>
+            </div>
+            <br>
+            <input type="submit" value="Upload" class="btn btn-success"/><br>
+        </form>
+    </div>
+    <br>
     <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
 </div>
 <script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>

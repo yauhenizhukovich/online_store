@@ -8,9 +8,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import static com.gmail.yauhenizhukovich.app.service.constant.AuthorityConstant.ROLE_PREFIX;
+
 public class AppUser implements UserDetails {
 
-    public static final String ROLE_PREFIX = "ROLE_";
     private final LoginUserDTO user;
     private final List<SimpleGrantedAuthority> authorities;
 

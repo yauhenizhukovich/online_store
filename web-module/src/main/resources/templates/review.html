@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Review</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div th:if="${review eq null}">
+    <h1 class="display-4 font-italic text-center"><strong>THIS REVIEW DOESNT EXIST</strong></h1>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<div th:unless="${review eq null}" th:object="${review}">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <h1 class="display-5 text-center font-italic"><strong>YOUR REVIEW</strong></h1>
+            </div>
+            <div class="col-sm"></div>
+        </div>
+    </div>
+
+    <div class="col-sm">
+        <dl class="row font-italic lead">
+
+            <dt class="col-sm-3">Author name:</dt>
+            <dd class="col-sm-9" th:text="*{authorName}">Not defined</dd>
+
+            <dt class="col-sm-3">Review text:</dt>
+            <dd class="col-sm-9" th:text="*{reviewText}">Not defined</dd>
+
+        </dl>
+        <a href="#" th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    </div>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

@@ -1,11 +1,10 @@
 package com.gmail.yauhenizhukovich.app.web.controller;
 
-import java.util.List;
 import javax.validation.Valid;
 
 import com.gmail.yauhenizhukovich.app.service.ArticleService;
 import com.gmail.yauhenizhukovich.app.service.exception.AnonymousUserException;
-import com.gmail.yauhenizhukovich.app.service.exception.UserAccessDeniedException;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
 import com.gmail.yauhenizhukovich.app.service.model.article.AddArticleDTO;
 import com.gmail.yauhenizhukovich.app.service.model.article.ArticleDTO;
 import com.gmail.yauhenizhukovich.app.service.model.article.ArticlesDTO;
@@ -20,11 +19,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import static com.gmail.yauhenizhukovich.app.web.constant.MessageConstant.DELETE_ARTICLE_FAIL_MESSAGE;
+
 @Controller
 @RequestMapping("/articles")
 public class ArticleController {
 
-    public static final String DELETE_ARTICLE_FAIL_MESSAGE = "This article doesnt exist.";
     private final ArticleService articleService;
 
     public ArticleController(ArticleService articleService) {this.articleService = articleService;}
@@ -34,10 +34,9 @@ public class ArticleController {
             @RequestParam(defaultValue = "1") Integer page,
             Model model
     ) {
-        List<ArticlesDTO> articles = articleService.getArticlesByPage(page);
-        model.addAttribute("articles", articles);
-        int pages = articleService.getCountOfPages();
-        model.addAttribute("pages", pages);
+        ObjectsDTOAndPagesEntity<ArticlesDTO> articles = articleService.getArticlesByPage(page);
+        model.addAttribute("articles", articles.getObjects());
+        model.addAttribute("pages", articles.getPages());
         return "articles";
     }
 
@@ -58,7 +57,7 @@ public class ArticleController {
     ) {
         boolean isDeleted = articleService.deleteArticleById(id);
         if (!isDeleted) {
-            return "redirect:/welcome?message=" + DELETE_ARTICLE_FAIL_MESSAGE;
+            return "redirect:/?message=" + DELETE_ARTICLE_FAIL_MESSAGE;
         }
         return "redirect:/articles";
     }
@@ -105,7 +104,7 @@ public class ArticleController {
             ArticleDTO addedArticle = articleService.addArticle(article);
             model.addAttribute("article", addedArticle);
             return "article";
-        } catch (AnonymousUserException | UserAccessDeniedException e) {
+        } catch (AnonymousUserException e) {
             return "redirect:/articles?message=" + e.getMessage();
         }
 

@@ -1,5 +1,7 @@
 package com.gmail.yauhenizhukovich.app.repository.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,6 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -28,10 +31,32 @@ public class User {
     @Column
     private String password;
     @Column
-    @Enumerated(EnumType.STRING)
+    @Enumerated(value = EnumType.STRING)
     private RoleEnumRepository role;
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private UserDetails userDetails;
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Order> orders = new ArrayList<>();
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Article> articles = new ArrayList<>();
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
+    }
+
+    public List<Article> getArticles() {
+        return articles;
+    }
+
+    public void setArticles(List<Article> articles) {
+        this.articles = articles;
+    }
 
     public UserDetails getUserDetails() {
         return userDetails;
@@ -91,15 +116,17 @@ public class User {
         }
         User that = (User) o;
         return Objects.equals(id, that.id) &&
-                Objects.equals(email, that.email) &&
                 Objects.equals(password, that.password) &&
                 role == that.role &&
-                Objects.equals(userDetails, that.userDetails);
+                Objects.equals(userDetails, that.userDetails) &&
+                Objects.equals(orders, that.orders) &&
+                Objects.equals(articles, that.articles) &&
+                Objects.equals(comments, that.comments);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, password, role, userDetails);
+        return Objects.hash(id, password, role, userDetails, orders, articles, comments);
     }
 
 }

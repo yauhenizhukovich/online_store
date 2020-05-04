@@ -9,17 +9,21 @@
 <body>
 <div th:if="${user eq null}">
     <h1 class="display-4 font-italic text-center"><strong>THIS USER DOESNT EXIST</strong></h1>
-    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    <div class="text-center">
+        <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    </div>
 </div>
 <div th:unless="${user eq null}">
-    <div class="container" th:object="${user}">
+
+    <div class="container">
         <div class="row">
             <div class="col-sm">
-                <h1 class="display-5 text-center font-italic" th:text="*{'User ' + email}"><strong>ADD USER</strong></h1>
+                <h1 class="display-5 text-center font-italic" th:text="${'User ' + user.email}"><strong>USER</strong></h1>
             </div>
             <div class="col-sm"></div>
         </div>
     </div>
+
     <div class="col-sm" th:object="${user}">
         <dl class="row font-italic lead">
 

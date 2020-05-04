@@ -1,6 +1,7 @@
 package com.gmail.yauhenizhukovich.app.repository.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
@@ -29,12 +30,12 @@ public class Article {
     private String content;
     @Column
     private LocalDate date;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "author_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
     private User author;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "article_id")
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     public List<Comment> getComments() {
         return comments;
