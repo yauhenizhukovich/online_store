@@ -1,4 +1,4 @@
-package com.gmail.yauhenizhukovich.app.service.util;
+package com.gmail.yauhenizhukovich.app.service.util.conversion;
 
 import com.gmail.yauhenizhukovich.app.repository.model.RoleEnumRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.User;

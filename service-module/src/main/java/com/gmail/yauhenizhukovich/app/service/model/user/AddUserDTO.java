@@ -1,27 +1,28 @@
 package com.gmail.yauhenizhukovich.app.service.model.user;
 
+import java.util.Objects;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.EMAIL_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.FIRSTNAME_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.FIRSTNAME_SIZE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.LASTNAME_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.LASTNAME_SIZE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NOT_EMPTY_EMAIL_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NOT_EMPTY_FIRSTNAME_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NOT_EMPTY_LASTNAME_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.NOT_EMPTY_PATRONYMIC_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.PATRONYMIC_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.PATRONYMIC_SIZE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.EMAIL_PATTERN;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_FIRSTNAME_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_LASTNAME_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_PATRONYMIC_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MIN_NAME_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.NAME_PATTERN;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.EMAIL_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.FIRSTNAME_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.FIRSTNAME_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.LASTNAME_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.LASTNAME_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.NOT_EMPTY_EMAIL_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.NOT_EMPTY_FIRSTNAME_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.NOT_EMPTY_LASTNAME_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.NOT_EMPTY_PATRONYMIC_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.PATRONYMIC_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.PATRONYMIC_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.EMAIL_PATTERN;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MAX_FIRSTNAME_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MAX_LASTNAME_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MAX_PATRONYMIC_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MIN_NAME_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.NAME_PATTERN;
 
 public class AddUserDTO {
 
@@ -81,6 +82,27 @@ public class AddUserDTO {
 
     public void setRole(RoleEnumService role) {
         this.role = role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AddUserDTO that = (AddUserDTO) o;
+        return Objects.equals(firstName, that.firstName) &&
+                Objects.equals(lastName, that.lastName) &&
+                Objects.equals(patronymic, that.patronymic) &&
+                Objects.equals(email, that.email) &&
+                role == that.role;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, lastName, patronymic, email, role);
     }
 
 }

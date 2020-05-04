@@ -1,59 +1,66 @@
 package com.gmail.yauhenizhukovich.app.web.controller;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.gmail.yauhenizhukovich.app.service.ArticleService;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
 import com.gmail.yauhenizhukovich.app.service.model.article.ArticleDTO;
 import com.gmail.yauhenizhukovich.app.service.model.article.ArticlesDTO;
 import com.gmail.yauhenizhukovich.app.service.model.article.CommentDTO;
+import com.gmail.yauhenizhukovich.app.web.controller.config.UnitTestConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.PAGE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.PAGES;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_AUTHOR_FIRSTNAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_AUTHOR_LASTNAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_COMMENT_CONTENT;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_CONTENT;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_DATE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_ID;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_RUNDOWN;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_TITLE;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ArticleController.class)
+@Import(UnitTestConfig.class)
 @WithMockUser(roles = "CUSTOMER_USER")
 class ArticleControllerTest {
 
-    private static final int PAGE = 5;
-    public static final String VALID_COMMENT_CONTENT = "Comment content.";
-    private static final LocalDate VALID_DATE = LocalDate.now();
-    public static final Long VALID_ID = 3L;
-    private static final String VALID_TITLE = "Good article!";
-    private static final String VALID_AUTHOR_FIRSTNAME = "I";
-    private static final String VALID_AUTHOR_LASTNAME = "Moria";
-    private static final String VALID_RUNDOWN = "This is the test content of article.";
-    private static final String VALID_CONTENT = "This is the test content of article.";
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private ArticleService articleService;
-    @MockBean
-    private UserDetailsService userDetailsService;
 
     @Test
     void getArticles_returnStatusOk() throws Exception {
+        List<ArticlesDTO> articles = new ArrayList<>();
+        ObjectsDTOAndPagesEntity<ArticlesDTO> articlesAndPages = new ObjectsDTOAndPagesEntity<>(PAGES, articles);
+        when(articleService.getArticlesByPage(any())).thenReturn(articlesAndPages);
         mockMvc.perform(get("/articles")).andExpect(status().isOk());
     }
 
     @Test
     void getArticlesWithParam_returnStatusOk() throws Exception {
+        List<ArticlesDTO> articles = new ArrayList<>();
+        ObjectsDTOAndPagesEntity<ArticlesDTO> articlesAndPages = new ObjectsDTOAndPagesEntity<>(PAGES, articles);
+        when(articleService.getArticlesByPage(PAGE)).thenReturn(articlesAndPages);
         mockMvc.perform(get("/articles")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE))).andExpect(status().isOk());
@@ -68,16 +75,18 @@ class ArticleControllerTest {
 
     @Test
     void getArticles_callBusinessLogic() throws Exception {
+        List<ArticlesDTO> articles = new ArrayList<>();
+        ObjectsDTOAndPagesEntity<ArticlesDTO> articlesAndPages = new ObjectsDTOAndPagesEntity<>(PAGES, articles);
+        when(articleService.getArticlesByPage(PAGE)).thenReturn(articlesAndPages);
         mockMvc.perform(get("/articles")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE))).andExpect(status().isOk());
-        verify(articleService, times(1)).getCountOfPages();
         verify(articleService, times(1)).getArticlesByPage(eq(PAGE));
     }
 
     @Test
     void getArticles_returnArticles() throws Exception {
-        List<ArticlesDTO> articles = getOneArticleList();
+        ObjectsDTOAndPagesEntity<ArticlesDTO> articles = getOneArticleList();
         when(articleService.getArticlesByPage(PAGE)).thenReturn(articles);
         MvcResult result = mockMvc.perform(get("/articles")
                 .contentType(MediaType.TEXT_HTML)
@@ -117,11 +126,11 @@ class ArticleControllerTest {
         Assertions.assertThat(actualContent).contains(VALID_CONTENT);
     }
 
-    private List<ArticlesDTO> getOneArticleList() {
+    private ObjectsDTOAndPagesEntity<ArticlesDTO> getOneArticleList() {
         List<ArticlesDTO> articles = new ArrayList<>();
         ArticlesDTO article = getArticlesDTO();
         articles.add(article);
-        return articles;
+        return new ObjectsDTOAndPagesEntity<>(PAGES, articles);
     }
 
     private ArticlesDTO getArticlesDTO() {

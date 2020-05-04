@@ -1,5 +1,6 @@
 package com.gmail.yauhenizhukovich.app.repository.impl;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
@@ -7,14 +8,18 @@ import javax.persistence.Query;
 import com.gmail.yauhenizhukovich.app.repository.UserRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.RoleEnumRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.User;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class UserRepositoryImpl extends GenericRepositoryImpl<Long, User> implements UserRepository {
 
+    private static final Logger logger = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+
     @Override
     @SuppressWarnings("unchecked")
-    public List<User> getObjectsByStartPositionAndMaxResult(int startPosition, int maxResult) {
+    public List<User> getPaginatedObjects(int startPosition, int maxResult) {
         String queryString = "FROM " +
                 entityClass.getSimpleName() + " e ORDER BY e.email";
         Query query = entityManager.createQuery(queryString);
@@ -32,6 +37,7 @@ public class UserRepositoryImpl extends GenericRepositoryImpl<Long, User> implem
             Object result = query.getSingleResult();
             return (User) result;
         } catch (NoResultException e) {
+            logger.info("User was searched for by a nonexistent email(or just checked for email existence).");
             return null;
         }
     }
@@ -41,7 +47,13 @@ public class UserRepositoryImpl extends GenericRepositoryImpl<Long, User> implem
         String queryString = "FROM " + entityClass.getSimpleName() + " e WHERE e.uniqueNumber=:uniqueNumber";
         Query query = entityManager.createQuery(queryString);
         query.setParameter("uniqueNumber", uniqueNumber);
-        return (User) query.getSingleResult();
+        try {
+            Object result = query.getSingleResult();
+            return (User) result;
+        } catch (NoResultException e) {
+            logger.info("User was searched for by a nonexistent unique number.");
+            return null;
+        }
     }
 
     @Override

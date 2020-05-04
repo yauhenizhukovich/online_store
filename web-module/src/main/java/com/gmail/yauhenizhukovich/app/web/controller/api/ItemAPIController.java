@@ -20,14 +20,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.gmail.yauhenizhukovich.app.web.controller.ArticleController.DELETE_ARTICLE_FAIL_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.web.controller.ItemController.DELETE_ITEM_FAIL_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.web.constant.MessageConstant.DELETE_ITEM_FAIL_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.web.constant.MessageConstant.DELETE_ITEM_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.web.constant.MessageConstant.NONEXISTENT_ITEM_MESSAGE;
 
 @RestController
 @RequestMapping("/api/items")
 public class ItemAPIController {
 
-    public static final String DELETE_ITEM_MESSAGE = "Item successfully deleted.";
+
     private final ItemService itemService;
 
     public ItemAPIController(ItemService itemService) {this.itemService = itemService;}
@@ -43,7 +44,7 @@ public class ItemAPIController {
     ) {
         ItemDTO item = itemService.getItemById(id);
         if (item == null) {
-            return "This item doesnt exist.";
+            return NONEXISTENT_ITEM_MESSAGE;
         }
         return item;
     }

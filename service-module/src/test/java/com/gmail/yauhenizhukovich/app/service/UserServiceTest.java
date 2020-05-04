@@ -2,15 +2,14 @@ package com.gmail.yauhenizhukovich.app.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import com.gmail.yauhenizhukovich.app.repository.UserRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.RoleEnumRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.User;
-import com.gmail.yauhenizhukovich.app.repository.model.UserDetails;
 import com.gmail.yauhenizhukovich.app.service.exception.AdministratorChangingException;
 import com.gmail.yauhenizhukovich.app.service.exception.UserExistenceException;
 import com.gmail.yauhenizhukovich.app.service.impl.UserServiceImpl;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
 import com.gmail.yauhenizhukovich.app.service.model.user.AddUserDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.LoginUserDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.RoleEnumService;
@@ -25,10 +24,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.COUNT_OF_USERS_BY_PAGE;
-import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getCountOfPagesByCountOfObjects;
-import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getStartPositionByPageNumber;
-import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDTOToDatabaseObject;
+import static com.gmail.yauhenizhukovich.app.service.constant.PageConstant.COUNT_OF_USERS_BY_PAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.ServiceUnitTestConstant.PAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.ServiceUnitTestConstant.START_POSITION;
+import static com.gmail.yauhenizhukovich.app.service.constant.ServiceUnitTestConstant.VALID_EMAIL;
+import static com.gmail.yauhenizhukovich.app.service.constant.ServiceUnitTestConstant.VALID_PATRONYMIC;
+import static com.gmail.yauhenizhukovich.app.service.constant.ServiceUnitTestConstant.VALID_ROLE;
+import static com.gmail.yauhenizhukovich.app.service.constant.ServiceUnitTestConstant.VALID_UNIQUE_NUMBER;
+import static com.gmail.yauhenizhukovich.app.service.exception.AdministratorChangingException.ADMINISTRATOR_CHANGING_EXCEPTION_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.util.ServiceUnitTestUtil.getUser;
+import static com.gmail.yauhenizhukovich.app.service.util.ServiceUnitTestUtil.mockAuthentication;
+import static com.gmail.yauhenizhukovich.app.service.util.conversion.UserConversionUtil.convertDTOToDatabaseObject;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,26 +42,17 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
-    public static final int PAGE = 3;
-    public static final long COUNT_OF_OBJECTS = 4L;
-    private static final String VALID_FIRSTNAME = "Ivan";
-    private static final String VALID_LASTNAME = "Ivanovich";
-    private static final String VALID_PATRONYMIC = "Ivanov";
-    private static final String VALID_EMAIL = "randommail@gmail.com";
-    private static final String VALID_PASSWORD = "test";
-    private static final String VALID_UNIQUE_NUMBER = UUID.randomUUID().toString();
-    private static final RoleEnumService VALID_ROLE = RoleEnumService.SECURE_API_USER;
-    private static final int START_POSITION = getStartPositionByPageNumber(PAGE, COUNT_OF_USERS_BY_PAGE);
-
     @Mock
     private UserRepository userRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private EmailService emailService;
     private UserService userService;
 
     @BeforeEach
     public void setup() {
-        userService = new UserServiceImpl(userRepository, passwordEncoder);
+        userService = new UserServiceImpl(userRepository, passwordEncoder, emailService);
     }
 
     @Test
@@ -82,24 +79,17 @@ public class UserServiceTest {
     @Test
     public void getUsersByPage_returnUsers() {
         List<User> returnedUsers = getUsers();
-        when(userRepository.getObjectsByStartPositionAndMaxResult(START_POSITION, COUNT_OF_USERS_BY_PAGE))
+        when(userRepository.getPaginatedObjects(START_POSITION, COUNT_OF_USERS_BY_PAGE))
                 .thenReturn(returnedUsers);
-        List<UsersDTO> actualUsers = userService.getUsersByPage(PAGE);
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = userService.getUsersByPage(PAGE);
+        List<UsersDTO> actualUsers = usersAndPages.getObjects();
         Assertions.assertThat(actualUsers).isNotNull();
-        verify(userRepository, times(1)).getObjectsByStartPositionAndMaxResult(START_POSITION, COUNT_OF_USERS_BY_PAGE);
+        verify(userRepository, times(1)).getPaginatedObjects(START_POSITION, COUNT_OF_USERS_BY_PAGE);
         UsersDTO actualUser = actualUsers.get(0);
         User returnedUser = returnedUsers.get(0);
         Assertions.assertThat(actualUser.getUniqueNumber()).isEqualTo(returnedUser.getUniqueNumber());
         Assertions.assertThat(actualUser.getLastName()).isEqualTo(returnedUser.getUserDetails().getLastName());
         Assertions.assertThat(actualUser.getEmail()).isEqualTo(returnedUser.getEmail());
-    }
-
-    @Test
-    public void getCountOfPages_returnPages() {
-        when(userRepository.getCountOfObjects()).thenReturn(COUNT_OF_OBJECTS);
-        int pages = userService.getCountOfPages();
-        verify(userRepository, times(1)).getCountOfObjects();
-        Assertions.assertThat(pages).isEqualTo(getCountOfPagesByCountOfObjects(COUNT_OF_OBJECTS, COUNT_OF_USERS_BY_PAGE));
     }
 
     @Test
@@ -155,6 +145,7 @@ public class UserServiceTest {
 
     @Test
     public void deleteLastAdministrator_returnAdministratorChangingException() {
+        mockAuthentication(VALID_EMAIL);
         when(userRepository.getCountOfUsersByRole(RoleEnumRepository.ADMINISTRATOR)).thenReturn(1L);
         User returnedUser = new User();
         returnedUser.setRole(RoleEnumRepository.ADMINISTRATOR);
@@ -164,21 +155,9 @@ public class UserServiceTest {
         org.junit.jupiter.api.Assertions.assertThrows(
                 AdministratorChangingException.class,
                 () -> userService.deleteUsersByUniqueNumber(uniqueNumbers),
-                "You cant delete all administrators."
+                ADMINISTRATOR_CHANGING_EXCEPTION_MESSAGE
         );
     }
-
-   /* @Test                                 TODO
-    public void getUserProfile_() {
-        userService.getUserProfile()
-    }
-*/
-
-    /* @Test                                 TODO
-     public void updateUserProfile_() {
-         userService.updateUserProfile()
-     }
- */
 
     @Test
     public void updateUser_returnUpdatedUser() throws AdministratorChangingException {
@@ -195,6 +174,7 @@ public class UserServiceTest {
 
     @Test
     public void updateLastAdministrator_returnAdministratorChangingException() {
+        mockAuthentication(VALID_EMAIL);
         User returnedUser = getUser();
         returnedUser.setRole(RoleEnumRepository.ADMINISTRATOR);
         when(userRepository.getUserByUniqueNumber(VALID_UNIQUE_NUMBER)).thenReturn(returnedUser);
@@ -205,24 +185,15 @@ public class UserServiceTest {
         org.junit.jupiter.api.Assertions.assertThrows(
                 AdministratorChangingException.class,
                 () -> userService.updateUser(updateUser),
-                "You cant update last administrator's role."
+                ADMINISTRATOR_CHANGING_EXCEPTION_MESSAGE
         );
-    }
-
-    private User getUser() {
-        User user = new User();
-        user.setEmail(VALID_EMAIL);
-        user.setPassword(VALID_PASSWORD);
-        user.setRole(RoleEnumRepository.valueOf(VALID_ROLE.name()));
-        UserDetails userDetails = new UserDetails();
-        user.setUserDetails(userDetails);
-        return user;
     }
 
     private AddUserDTO getAddedUser() {
         AddUserDTO user = new AddUserDTO();
         user.setRole(VALID_ROLE);
         user.setEmail(VALID_EMAIL);
+        user.setPatronymic(VALID_PATRONYMIC);
         return user;
     }
 

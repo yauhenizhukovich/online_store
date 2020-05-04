@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Articles</title>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
@@ -17,12 +16,15 @@
             <td class="font-weight-bold">
                 <div th:text="${article.date}">Date not defined</div>
             </td>
-            <td class="font-weight-bold col-sm-2">
-                <div th:text="${article.title}">Title not defined</div>
-                <div th:text="${article.authorFirstName + ' ' + article.authorLastName}">Author not defined</div>
+            <td th:unless="${article.authorFirstName eq null && article.authorLastName eq null}"
+                th:text="${article.authorFirstName + ' ' + article.authorLastName}" class="font-weight-bold"></td>
+            <td th:if="${article.authorFirstName eq null && article.authorLastName eq null}"
+                class="font-weight-bold">
+                Unknown author
             </td>
-            <td th:text="${article.rundown}">
-                Rundown not defined
+            <td class="col-sm-4">
+                <div class="font-weight-bold" th:text="${article.title}">Title not defined</div>
+                <div th:text="${article.rundown}+'...'">Rundown not defined</div>
             </td>
             <td>
                 <a th:href="@{/articles/{id}(id=${article.id})}" class="btn btn-success"

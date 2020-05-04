@@ -23,21 +23,22 @@
 
                 <div class="form-group">
                     <label for="dateInput" class="font-weight-normal">Date</label>
-                    <input type="date" class="form-control" name="date"
+                    <input type="date" max="3000-01-01" class="form-control" name="date"
                            th:value="*{date}" id="dateInput">
                 </div>
 
                 <div class="form-group">
                     <label for="titleInput" class="font-weight-normal">Title</label>
-                    <input type="text" minlength="1" maxlength="40" pattern="^[a-zA-Z0-9 -]+$" name="title"
+                    <input class="form-control" type="text" minlength="1" maxlength="40" pattern="^[a-zA-Z0-9 ,-]+$" name="title"
                            th:value="*{title}" id="titleInput">
                 </div>
 
                 <div class="form-group">
                     <label for="contentInput" class="font-weight-normal">Content</label>
-                    <input type="text" minlength="2" maxlength="1000" name="content"
-                           th:value="*{content}" id="contentInput">
+                    <textarea class="form-control" minlength="2" maxlength="1000" name="content"
+                              id="contentInput" th:inline="text">[[*{content}]]</textarea>
                 </div>
+
                 <input type="submit" class="btn btn-success" value="Add article"/>
                 <a th:href="@{/articles}" class="btn btn-primary" role="button">Back to articles</a>
             </form>

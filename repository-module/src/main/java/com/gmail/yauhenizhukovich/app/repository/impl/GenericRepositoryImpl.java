@@ -38,13 +38,6 @@ public abstract class GenericRepositoryImpl<I, T> implements GenericRepository<I
     }
 
     @Override
-    public Long getCountOfObjects() {
-        String queryString = "SELECT COUNT(*) FROM " + entityClass.getSimpleName() + " e";
-        Query query = entityManager.createQuery(queryString);
-        return (Long) query.getSingleResult();
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public List<T> getAll() {
         String queryString = "FROM " + entityClass.getSimpleName() + " e";
@@ -53,8 +46,15 @@ public abstract class GenericRepositoryImpl<I, T> implements GenericRepository<I
     }
 
     @Override
+    public Long getCountOfObjects() {
+        String queryString = "SELECT COUNT(*) FROM " + entityClass.getSimpleName() + " e";
+        Query query = entityManager.createQuery(queryString);
+        return (Long) query.getSingleResult();
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
-    public List<T> getObjectsByStartPositionAndMaxResult(int startPosition, int maxResult) {
+    public List<T> getPaginatedObjects(int startPosition, int maxResult) {
         String queryString = "FROM " +
                 entityClass.getSimpleName() + " e";
         Query query = entityManager.createQuery(queryString);

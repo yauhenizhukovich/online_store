@@ -1,9 +1,9 @@
-package com.gmail.yauhenizhukovich.app.service.constant;
+package com.gmail.yauhenizhukovich.app.service.constant.validation;
 
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_FIRSTNAME_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_LASTNAME_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MAX_PATRONYMIC_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationRules.MIN_NAME_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MAX_FIRSTNAME_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MAX_LASTNAME_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MAX_PATRONYMIC_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationRules.MIN_NAME_SIZE;
 
 public interface UserValidationMessages {
 

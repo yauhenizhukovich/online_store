@@ -5,6 +5,7 @@ import java.util.List;
 import com.gmail.yauhenizhukovich.app.service.exception.AdministratorChangingException;
 import com.gmail.yauhenizhukovich.app.service.exception.AnonymousUserException;
 import com.gmail.yauhenizhukovich.app.service.exception.UserExistenceException;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
 import com.gmail.yauhenizhukovich.app.service.model.user.AddUserDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.LoginUserDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.UpdateUserDTO;
@@ -17,9 +18,7 @@ public interface UserService {
 
     LoginUserDTO getUserByEmail(String email);
 
-    List<UsersDTO> getUsersByPage(int pageNumber);
-
-    int getCountOfPages();
+    ObjectsDTOAndPagesEntity<UsersDTO> getUsersByPage(int pageNumber);
 
     UserDTO addUser(AddUserDTO user) throws UserExistenceException;
 

@@ -24,7 +24,7 @@ public class Review {
     @Column
     private LocalDate date;
     @Column
-    private boolean active;
+    private Boolean active;
 
     public Long getId() {
         return id;
@@ -58,11 +58,11 @@ public class Review {
         this.date = date;
     }
 
-    public boolean getActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
@@ -75,10 +75,10 @@ public class Review {
             return false;
         }
         Review review = (Review) o;
-        return active == review.active &&
-                Objects.equals(id, review.id) &&
+        return Objects.equals(id, review.id) &&
                 Objects.equals(reviewText, review.reviewText) &&
-                Objects.equals(date, review.date);
+                Objects.equals(date, review.date) &&
+                Objects.equals(active, review.active);
     }
 
     @Override

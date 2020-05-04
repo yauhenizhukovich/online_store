@@ -12,9 +12,20 @@ public class ArticleRepositoryImpl extends GenericRepositoryImpl<Long, Article> 
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<Article> getObjectsByStartPositionAndMaxResult(int startPosition, int maxResult) {
+    public List<Article> getPaginatedObjects(int startPosition, int maxResult) {
         String queryString = "FROM " +
                 entityClass.getSimpleName() + " e ORDER BY e.date DESC";
+        Query query = entityManager.createQuery(queryString);
+        query.setFirstResult(startPosition);
+        query.setMaxResults(maxResult);
+        return (List<Article>) query.getResultList();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Article> getPaginatedArticlesUntilCurrentDate(int startPosition, int maxResult) {
+        String queryString = "FROM " +
+                entityClass.getSimpleName() + " e WHERE e.date <= current_date ORDER BY e.date DESC";
         Query query = entityManager.createQuery(queryString);
         query.setFirstResult(startPosition);
         query.setMaxResults(maxResult);

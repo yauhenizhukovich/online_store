@@ -5,26 +5,36 @@ import java.util.List;
 
 import com.gmail.yauhenizhukovich.app.service.UserService;
 import com.gmail.yauhenizhukovich.app.service.exception.AdministratorChangingException;
-import com.gmail.yauhenizhukovich.app.service.exception.AnonymousUserException;
 import com.gmail.yauhenizhukovich.app.service.exception.UserExistenceException;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
 import com.gmail.yauhenizhukovich.app.service.model.user.AddUserDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.RoleEnumService;
 import com.gmail.yauhenizhukovich.app.service.model.user.UserDTO;
-import com.gmail.yauhenizhukovich.app.service.model.user.UserProfileDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.UsersDTO;
+import com.gmail.yauhenizhukovich.app.web.controller.config.UnitTestConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static com.gmail.yauhenizhukovich.app.service.constant.UserValidationMessages.EMAIL_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.UserValidationMessages.EMAIL_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.exception.AdministratorChangingException.ADMINISTRATOR_CHANGING_EXCEPTION_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.PAGE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.PAGES;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_EMAIL;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_FIRST_NAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_LAST_NAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_PATRONYMIC;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_ROLE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_UNIQUE_NUMBER;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,33 +45,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = UserController.class)
+@Import(UnitTestConfig.class)
 @WithMockUser(roles = "ADMINISTRATOR")
 class UserControllerTest {
 
-    private static final int PAGE = 3;
-    private static final String VALID_FIRST_NAME = "Ivan";
-    private static final String VALID_LAST_NAME = "Sidorov";
-    private static final String VALID_PATRONYMIC = "Petrovich";
-    private static final String VALID_EMAIL = "sidorov@gmail.com";
-    private static final String VALID_UNIQUE_NUMBER = "testUniqueNumber";
-    private static final RoleEnumService VALID_ROLE = RoleEnumService.SALE_USER;
-    private static final String VALID_TELEPHONE = "80292258425";
-    private static final String VALID_ADDRESS = "Beverly Hills, 25A";
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private UserService userService;
-    @MockBean
-    private UserDetailsService userDetailsService;
 
     @Test
     void getUsers_returnStatusOk() throws Exception {
+        List<UsersDTO> users = new ArrayList<>();
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = new ObjectsDTOAndPagesEntity<>(PAGES, users);
+        when(userService.getUsersByPage(anyInt())).thenReturn(usersAndPages);
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getUsersWithParameters_returnStatusOk() throws Exception {
+        List<UsersDTO> users = new ArrayList<>();
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = new ObjectsDTOAndPagesEntity<>(PAGES, users);
+        when(userService.getUsersByPage(PAGE)).thenReturn(usersAndPages);
         mockMvc.perform(get("/users")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE)))
@@ -78,94 +84,96 @@ class UserControllerTest {
 
     @Test
     void getUsersWithParameters_callBusinessLogic() throws Exception {
+        List<UsersDTO> users = new ArrayList<>();
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = new ObjectsDTOAndPagesEntity<>(PAGES, users);
+        when(userService.getUsersByPage(PAGE)).thenReturn(usersAndPages);
         mockMvc.perform(get("/users")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE)))
                 .andExpect(status().isOk());
-        verify(userService, times(1)).getCountOfPages();
         verify(userService, times(1)).getUsersByPage(eq(PAGE));
     }
 
     @Test
     void getUsersWithParameters_returnUsersWithRightEmail() throws Exception {
-        List<UsersDTO> users = getOneUserList();
-        when(userService.getUsersByPage(PAGE)).thenReturn(users);
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = getOneUserList();
+        when(userService.getUsersByPage(PAGE)).thenReturn(usersAndPages);
         MvcResult result = mockMvc.perform(get("/users")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE)))
                 .andReturn();
         String actualContent = result.getResponse().getContentAsString();
-        UsersDTO user = users.get(0);
+        UsersDTO user = usersAndPages.getObjects().get(0);
         String email = user.getEmail();
         Assertions.assertThat(actualContent).contains(email);
     }
 
     @Test
     void getUsersWithParameters_returnUsersWithRightFirstName() throws Exception {
-        List<UsersDTO> users = getOneUserList();
-        when(userService.getUsersByPage(PAGE)).thenReturn(users);
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = getOneUserList();
+        when(userService.getUsersByPage(PAGE)).thenReturn(usersAndPages);
         MvcResult result = mockMvc.perform(get("/users")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE)))
                 .andReturn();
         String actualContent = result.getResponse().getContentAsString();
-        UsersDTO user = users.get(0);
+        UsersDTO user = usersAndPages.getObjects().get(0);
         String firstName = user.getFirstName();
         Assertions.assertThat(actualContent).contains(firstName);
     }
 
     @Test
     void getUsersWithParameters_returnUsersWithRightLastName() throws Exception {
-        List<UsersDTO> users = getOneUserList();
-        when(userService.getUsersByPage(PAGE)).thenReturn(users);
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = getOneUserList();
+        when(userService.getUsersByPage(PAGE)).thenReturn(usersAndPages);
         MvcResult result = mockMvc.perform(get("/users")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE)))
                 .andReturn();
         String actualContent = result.getResponse().getContentAsString();
-        UsersDTO user = users.get(0);
+        UsersDTO user = usersAndPages.getObjects().get(0);
         String lastName = user.getLastName();
         Assertions.assertThat(actualContent).contains(lastName);
     }
 
     @Test
     void getUsersWithParameters_returnUsersWithRightPatronymic() throws Exception {
-        List<UsersDTO> users = getOneUserList();
-        when(userService.getUsersByPage(PAGE)).thenReturn(users);
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = getOneUserList();
+        when(userService.getUsersByPage(PAGE)).thenReturn(usersAndPages);
         MvcResult result = mockMvc.perform(get("/users")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE)))
                 .andReturn();
         String actualContent = result.getResponse().getContentAsString();
-        UsersDTO user = users.get(0);
+        UsersDTO user = usersAndPages.getObjects().get(0);
         String patronymic = user.getPatronymic();
         Assertions.assertThat(actualContent).contains(patronymic);
     }
 
     @Test
     void getUsersWithParameters_returnUsersWithRightRole() throws Exception {
-        List<UsersDTO> users = getOneUserList();
-        when(userService.getUsersByPage(PAGE)).thenReturn(users);
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = getOneUserList();
+        when(userService.getUsersByPage(PAGE)).thenReturn(usersAndPages);
         MvcResult result = mockMvc.perform(get("/users")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE)))
                 .andReturn();
         String actualContent = result.getResponse().getContentAsString();
-        UsersDTO user = users.get(0);
+        UsersDTO user = usersAndPages.getObjects().get(0);
         RoleEnumService role = user.getRole();
         Assertions.assertThat(actualContent).contains(role.name());
     }
 
     @Test
     void getUsersWithParameters_returnUsersWithRightUniqueNumber() throws Exception {
-        List<UsersDTO> users = getOneUserList();
-        when(userService.getUsersByPage(PAGE)).thenReturn(users);
+        ObjectsDTOAndPagesEntity<UsersDTO> usersAndPages = getOneUserList();
+        when(userService.getUsersByPage(PAGE)).thenReturn(usersAndPages);
         MvcResult result = mockMvc.perform(get("/users")
                 .contentType(MediaType.TEXT_HTML)
                 .param("page", String.valueOf(PAGE)))
                 .andReturn();
         String actualContent = result.getResponse().getContentAsString();
-        UsersDTO user = users.get(0);
+        UsersDTO user = usersAndPages.getObjects().get(0);
         String uniqueNumber = user.getUniqueNumber();
         Assertions.assertThat(actualContent).contains(uniqueNumber);
     }
@@ -194,7 +202,7 @@ class UserControllerTest {
                 .param("patronymic", VALID_PATRONYMIC)
                 .param("email", VALID_EMAIL)
                 .param("role", VALID_ROLE.name())
-        ).andExpect(status().isOk());
+        ).andExpect(redirectedUrl("/users"));
     }
 
     @Test
@@ -381,7 +389,7 @@ class UserControllerTest {
                 .param("patronymic", user.getPatronymic())
                 .param("email", user.getEmail())
                 .param("role", user.getRole().name())
-        ).andExpect(status().isOk());
+        ).andExpect(redirectedUrl("/users"));
         verify(userService, times(1)).addUser(any());
     }
 
@@ -426,7 +434,7 @@ class UserControllerTest {
 
     @Test
     void addUserWithExistingEmail_returnAddUserPageWithError() throws Exception, UserExistenceException {
-        when(userService.addUser(any())).thenThrow(new UserExistenceException("User with this email already exists."));
+        when(userService.addUser(any())).thenThrow(new UserExistenceException());
         MvcResult result = mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("firstName", VALID_FIRST_NAME)
@@ -443,17 +451,14 @@ class UserControllerTest {
     void addValidUser_returnUserPage() throws Exception, UserExistenceException {
         UserDTO user = getFilledUserDTO();
         when(userService.addUser(any())).thenReturn(user);
-        MvcResult result = mockMvc.perform(post("/users")
+       mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("firstName", VALID_FIRST_NAME)
                 .param("lastName", VALID_LAST_NAME)
                 .param("patronymic", VALID_PATRONYMIC)
                 .param("email", VALID_EMAIL)
                 .param("role", VALID_ROLE.name())
-        ).andReturn();
-        String actualContent = result.getResponse().getContentAsString();
-        Assertions.assertThat(actualContent).contains(VALID_LAST_NAME);
-        Assertions.assertThat(actualContent).contains(VALID_EMAIL);
+        ).andExpect(redirectedUrl("/users"));
     }
 
     @Test
@@ -466,7 +471,6 @@ class UserControllerTest {
 
     @Test
     void getUserByInvalidUniqueNumber_returnEmptyUserPage() throws Exception {
-        UserDTO user = getFilledUserDTO();
         when(userService.getUserByUniqueNumber(VALID_UNIQUE_NUMBER)).thenReturn(null);
         MvcResult result = mockMvc.perform(get("/users/{uniqueNumber}", VALID_UNIQUE_NUMBER))
                 .andReturn();
@@ -537,19 +541,18 @@ class UserControllerTest {
         List<String> uniqueNumbers = new ArrayList<>();
         uniqueNumbers.add(VALID_UNIQUE_NUMBER);
         uniqueNumbers.add("test1");
-        when(userService.deleteUsersByUniqueNumber(uniqueNumbers)).thenThrow(new AdministratorChangingException(
-                "You can't delete all administrators!"));
+        when(userService.deleteUsersByUniqueNumber(uniqueNumbers)).thenThrow(new AdministratorChangingException());
         mockMvc.perform(post("/users/delete")
                 .param("uniqueNumbers", VALID_UNIQUE_NUMBER)
                 .param("uniqueNumbers", "test1")
-        ).andExpect(redirectedUrl("/users?message=" + "You can't delete all administrators!"));
+        ).andExpect(redirectedUrl("/users?message=" + ADMINISTRATOR_CHANGING_EXCEPTION_MESSAGE));
     }
 
-    private List<UsersDTO> getOneUserList() {
+    private ObjectsDTOAndPagesEntity<UsersDTO> getOneUserList() {
         List<UsersDTO> users = new ArrayList<>();
         UsersDTO user = getFilledUsersDTO();
         users.add(user);
-        return users;
+        return new ObjectsDTOAndPagesEntity<>(PAGES, users);
     }
 
     private UsersDTO getFilledUsersDTO() {

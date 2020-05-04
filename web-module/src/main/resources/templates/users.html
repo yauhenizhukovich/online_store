@@ -30,7 +30,12 @@
                     <td th:text="${status.count}"/>
                     <td th:text="*{lastName + ' ' + firstName + ' ' + patronymic}">Name not defined</td>
                     <td th:text="*{email}">Email not defined</td>
-                    <td th:value="*{role}" th:text="${#strings.replace(user.role,'_',' ').toUpperCase()}">
+                    <td th:value="*{role}" th:text="*{
+                                #strings.substring(role,0,1)
+                                .concat(#strings.substring(role,1)
+                                .toLowerCase()
+                                .replace('_',' '))
+                                }">
                         Role not defined
                     </td>
                     <td>

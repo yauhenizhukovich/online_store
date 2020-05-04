@@ -1,68 +1,72 @@
 package com.gmail.yauhenizhukovich.app.service.impl;
 
+import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import com.gmail.yauhenizhukovich.app.repository.ArticleRepository;
+import com.gmail.yauhenizhukovich.app.repository.CommentRepository;
 import com.gmail.yauhenizhukovich.app.repository.UserRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.Article;
 import com.gmail.yauhenizhukovich.app.repository.model.Comment;
 import com.gmail.yauhenizhukovich.app.repository.model.User;
 import com.gmail.yauhenizhukovich.app.service.ArticleService;
 import com.gmail.yauhenizhukovich.app.service.exception.AnonymousUserException;
-import com.gmail.yauhenizhukovich.app.service.exception.UserAccessDeniedException;
-import com.gmail.yauhenizhukovich.app.service.model.article.UpdateArticleDTO;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
 import com.gmail.yauhenizhukovich.app.service.model.article.AddArticleDTO;
 import com.gmail.yauhenizhukovich.app.service.model.article.ArticleDTO;
 import com.gmail.yauhenizhukovich.app.service.model.article.ArticlesDTO;
+import com.gmail.yauhenizhukovich.app.service.model.article.UpdateArticleDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.RoleEnumService;
-import com.gmail.yauhenizhukovich.app.service.util.ArticleConversionUtil;
+import com.gmail.yauhenizhukovich.app.service.util.conversion.ArticleConversionUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import static com.gmail.yauhenizhukovich.app.service.constant.ArticleValidationRules.MAX_RUNDOWN_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.model.user.AppUser.ROLE_PREFIX;
-import static com.gmail.yauhenizhukovich.app.service.util.ArticleConversionUtil.convertDTOToDatabaseObject;
-import static com.gmail.yauhenizhukovich.app.service.util.ArticleConversionUtil.convertDatabaseObjectToArticleDTO;
-import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.COUNT_OF_ARTICLES_BY_PAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.AuthorityConstant.ANONYMOUS_USER_NAME;
+import static com.gmail.yauhenizhukovich.app.service.constant.AuthorityConstant.ROLE_PREFIX;
+import static com.gmail.yauhenizhukovich.app.service.constant.PageConstant.COUNT_OF_ARTICLES_BY_PAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.PageConstant.MAX_RUNDOWN_SIZE;
 import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getCountOfPagesByCountOfObjects;
 import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getStartPositionByPageNumber;
+import static com.gmail.yauhenizhukovich.app.service.util.conversion.ArticleConversionUtil.convertDTOToDatabaseObject;
+import static com.gmail.yauhenizhukovich.app.service.util.conversion.ArticleConversionUtil.convertDatabaseObjectToArticleDTO;
 
 @Service
 @Transactional
 public class ArticleServiceImpl implements ArticleService {
 
+    private static final Logger logger = LogManager.getLogger(MethodHandles.lookup().lookupClass());
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
-    public ArticleServiceImpl(ArticleRepository articleRepository, UserRepository userRepository) {
+    public ArticleServiceImpl(
+            ArticleRepository articleRepository,
+            UserRepository userRepository,
+            CommentRepository commentRepository
+    ) {
         this.articleRepository = articleRepository;
         this.userRepository = userRepository;
+        this.commentRepository = commentRepository;
     }
 
     @Override
-    public ArticleDTO addArticle(AddArticleDTO articleDTO) throws AnonymousUserException, UserAccessDeniedException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getName().equals("anonymousUser")) {
-            //            throw new AnonymousUserException("Anonim"); TODO
+    public ArticleDTO addArticle(AddArticleDTO articleDTO) throws AnonymousUserException {
+        Authentication authentication = getAuthentication();
+        if (authentication.getName().equals(ANONYMOUS_USER_NAME)) {
+            logger.error("Anonymous user tried to add an article.");
+            throw new AnonymousUserException();
         }
-        boolean isSecureAPIUser = authentication
-                .getAuthorities()
-                .stream()
-                .anyMatch(auth -> Objects.equals(auth.getAuthority(), ROLE_PREFIX + RoleEnumService.SECURE_API_USER));
-        boolean isSaleUser = authentication
-                .getAuthorities()
-                .stream()
-                .anyMatch(auth -> Objects.equals(auth.getAuthority(), ROLE_PREFIX + RoleEnumService.SALE_USER));
-        if (!isSecureAPIUser || !isSaleUser) {
-            //            throw new UserAccessDeniedException();  TODO
-        }
+        User user = userRepository.getUserByEmail(authentication.getName());
         Article article = convertDTOToDatabaseObject(articleDTO);
-        User user = userRepository.getUserByEmail("secure@gmail.com");    //authentication.getName() <-- to replace TODO
         article.setAuthor(user);
         article = articleRepository.add(article);
         return convertDatabaseObjectToArticleDTO(article);
@@ -71,40 +75,34 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<ArticlesDTO> getAllArticles() {
         List<Article> articles = articleRepository.getAll();
-        return articles.stream()
-                .map(ArticleConversionUtil::convertDatabaseObjectToArticlesDTO)
-                .peek(article ->
-                        article.setRundown(
-                                articleRepository.getRundownById(
-                                        MAX_RUNDOWN_SIZE, article.getId()
-                                )))
-                .collect(Collectors.toList());
+        return getArticlesDTO(articles);
     }
 
     @Override
-    public List<ArticlesDTO> getArticlesByPage(Integer page) {
+    public ObjectsDTOAndPagesEntity<ArticlesDTO> getArticlesByPage(Integer page) {
         int startPosition = getStartPositionByPageNumber(page, COUNT_OF_ARTICLES_BY_PAGE);
-        List<Article> articles = articleRepository.getObjectsByStartPositionAndMaxResult(startPosition, COUNT_OF_ARTICLES_BY_PAGE);
-        return articles.stream()
-                .map(ArticleConversionUtil::convertDatabaseObjectToArticlesDTO)
-                .peek(article ->
-                        article.setRundown(
-                                articleRepository.getRundownById(
-                                        MAX_RUNDOWN_SIZE, article.getId()
-                                )))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public int getCountOfPages() {
-        Long countOfArticles = articleRepository.getCountOfObjects();
-        return getCountOfPagesByCountOfObjects(countOfArticles, COUNT_OF_ARTICLES_BY_PAGE);
+        Authentication authentication = getAuthentication();
+        Optional<String> role = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst();
+        List<Article> articles = new ArrayList<>();
+        if (role.isPresent()) {
+            articles = getArticlesByRole(startPosition, role.get());
+        }
+        List<ArticlesDTO> articlesDTO = getArticlesDTO(articles);
+        int pages = getPages();
+        return new ObjectsDTOAndPagesEntity<>(pages, articlesDTO);
     }
 
     @Override
     public ArticleDTO getArticleById(Long id) {
         Article article = articleRepository.getById(id);
         if (article == null) {
+            logger.info(getAuthentication().getName() + " tried to get nonexistent article.");
+            return null;
+        }
+        if (checkCustomerRoleAndArticleForFuture(article)) {
+            logger.info(getAuthentication().getName() + " tried to get closed article.");
             return null;
         }
         return convertDatabaseObjectToArticleDTO(article);
@@ -129,29 +127,46 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public boolean deleteCommentByArticleIdAndCommentId(Long articleId, Long commentId) {
         Article article = articleRepository.getById(articleId);
+        Comment comment = commentRepository.getById(commentId);
         List<Comment> comments = article.getComments();
-        if (!clearIfArticleHasOneComment(commentId, comments)) {
-            return removeComment(commentId, comments);
-        }
-        return true;
+        return comments.remove(comment);
     }
 
-    private boolean removeComment(Long commentId, List<Comment> comments) {
-        for (int i = 0; i < comments.size(); i++) {
-            if (comments.get(i).getId().equals(commentId)) {
-                comments.remove(i);
-                return true;
-            }
-        }
-        return false;
+    private int getPages() {
+        Long countOfArticles = articleRepository.getCountOfObjects();
+        return getCountOfPagesByCountOfObjects(countOfArticles, COUNT_OF_ARTICLES_BY_PAGE);
     }
 
-    private boolean clearIfArticleHasOneComment(Long commentId, List<Comment> comments) {
-        if (comments.size() == 1) {
-            if (comments.get(0).getId().equals(commentId)) {
-                comments.clear();
-                return true;
-            }
+    private List<ArticlesDTO> getArticlesDTO(List<Article> articles) {
+        return articles.stream()
+                .map(ArticleConversionUtil::convertDatabaseObjectToArticlesDTO)
+                .peek(article ->
+                        article.setRundown(
+                                articleRepository.getRundownById(
+                                        MAX_RUNDOWN_SIZE,
+                                        article.getId()
+                                )))
+                .collect(Collectors.toList());
+    }
+
+    private List<Article> getArticlesByRole(int startPosition, String role) {
+        List<Article> articles;
+        if (role.equals(ROLE_PREFIX + RoleEnumService.SALE_USER.name())) {
+            articles = articleRepository.getPaginatedObjects(startPosition, COUNT_OF_ARTICLES_BY_PAGE);
+        } else {
+            articles = articleRepository.getPaginatedArticlesUntilCurrentDate(startPosition,
+                    COUNT_OF_ARTICLES_BY_PAGE);
+        }
+        return articles;
+    }
+
+    private boolean checkCustomerRoleAndArticleForFuture(Article article) {
+        Authentication authentication = getAuthentication();
+        boolean isCustomer = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals(ROLE_PREFIX + RoleEnumService.CUSTOMER_USER.name()));
+        if (isCustomer) {
+            return article.getDate().isAfter(LocalDate.now());
         }
         return false;
     }
@@ -160,6 +175,10 @@ public class ArticleServiceImpl implements ArticleService {
         article.setTitle(updatedArticle.getTitle());
         article.setContent(updatedArticle.getContent());
         article.setDate(LocalDate.now());
+    }
+
+    private Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 
 }

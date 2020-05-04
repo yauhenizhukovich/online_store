@@ -4,12 +4,12 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import static com.gmail.yauhenizhukovich.app.service.constant.ArticleValidationMessages.CONTENT_SIZE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ArticleValidationMessages.NOT_EMPTY_CONTENT_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ArticleValidationMessages.NOT_EMPTY_TITLE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ArticleValidationMessages.TITLE_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ArticleValidationRules.MAX_CONTENT_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ArticleValidationRules.TITLE_PATTERN;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ArticleValidationMessages.CONTENT_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ArticleValidationMessages.NOT_EMPTY_CONTENT_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ArticleValidationMessages.NOT_EMPTY_TITLE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ArticleValidationMessages.TITLE_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ArticleValidationRules.MAX_CONTENT_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ArticleValidationRules.TITLE_PATTERN;
 
 public class UpdateArticleDTO {
 

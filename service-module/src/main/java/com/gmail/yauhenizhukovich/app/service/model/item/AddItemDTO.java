@@ -1,6 +1,7 @@
 package com.gmail.yauhenizhukovich.app.service.model.item;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
@@ -9,20 +10,20 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationMessages.ITEM_DESCRIPTION_SIZE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationMessages.ITEM_NAME_PATTERN_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationMessages.MAX_PRICE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationMessages.MIN_PRICE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationMessages.NOT_EMPTY_ITEM_DESCRIPTION_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationMessages.NOT_EMPTY_ITEM_NAME_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationMessages.NOT_NULL_PRICE_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationMessages.PRICE_FORMAT_MESSAGE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationRules.ITEM_NAME_PATTERN;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationRules.MAX_ITEM_DESCRIPTION_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationRules.MAX_PRICE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationRules.MIN_PRICE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationRules.PRICE_FRACTION_PART_SIZE;
-import static com.gmail.yauhenizhukovich.app.service.constant.ItemValidationRules.PRICE_INTEGER_PART_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationMessages.ITEM_DESCRIPTION_SIZE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationMessages.ITEM_NAME_PATTERN_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationMessages.MAX_PRICE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationMessages.MIN_PRICE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationMessages.NOT_EMPTY_ITEM_DESCRIPTION_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationMessages.NOT_EMPTY_ITEM_NAME_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationMessages.NOT_NULL_PRICE_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationMessages.PRICE_FORMAT_MESSAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationRules.ITEM_NAME_PATTERN;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationRules.MAX_ITEM_DESCRIPTION_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationRules.MAX_PRICE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationRules.MIN_PRICE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationRules.PRICE_FRACTION_PART_SIZE;
+import static com.gmail.yauhenizhukovich.app.service.constant.validation.ItemValidationRules.PRICE_INTEGER_PART_SIZE;
 
 public class AddItemDTO {
 
@@ -60,6 +61,25 @@ public class AddItemDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AddItemDTO that = (AddItemDTO) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(price, that.price) &&
+                Objects.equals(description, that.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, price, description);
     }
 
 }

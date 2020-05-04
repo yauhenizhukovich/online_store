@@ -1,5 +1,6 @@
 package com.gmail.yauhenizhukovich.app.service.impl;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -10,10 +11,12 @@ import com.gmail.yauhenizhukovich.app.repository.UserRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.RoleEnumRepository;
 import com.gmail.yauhenizhukovich.app.repository.model.User;
 import com.gmail.yauhenizhukovich.app.repository.model.UserDetails;
+import com.gmail.yauhenizhukovich.app.service.EmailService;
 import com.gmail.yauhenizhukovich.app.service.UserService;
 import com.gmail.yauhenizhukovich.app.service.exception.AdministratorChangingException;
 import com.gmail.yauhenizhukovich.app.service.exception.AnonymousUserException;
 import com.gmail.yauhenizhukovich.app.service.exception.UserExistenceException;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
 import com.gmail.yauhenizhukovich.app.service.model.user.AddUserDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.LoginUserDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.RoleEnumService;
@@ -22,32 +25,67 @@ import com.gmail.yauhenizhukovich.app.service.model.user.UpdateUserProfileDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.UserDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.UserProfileDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.UsersDTO;
-import com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil;
+import com.gmail.yauhenizhukovich.app.service.util.conversion.UserConversionUtil;
 import net.bytebuddy.utility.RandomString;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.COUNT_OF_USERS_BY_PAGE;
+import static com.gmail.yauhenizhukovich.app.service.constant.AuthorityConstant.ANONYMOUS_USER_NAME;
+import static com.gmail.yauhenizhukovich.app.service.constant.MailConstant.MAIL_TEXT;
+import static com.gmail.yauhenizhukovich.app.service.constant.MailConstant.MAIL_TITLE;
+import static com.gmail.yauhenizhukovich.app.service.constant.PageConstant.COUNT_OF_USERS_BY_PAGE;
 import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getCountOfPagesByCountOfObjects;
 import static com.gmail.yauhenizhukovich.app.service.util.PaginationUtil.getStartPositionByPageNumber;
-import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDTOToDatabaseObject;
-import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDatabaseObjectToDTOToLogin;
-import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDatabaseObjectToUserDTO;
-import static com.gmail.yauhenizhukovich.app.service.util.UserConversionUtil.convertDatabaseObjectToUserProfileDTO;
+import static com.gmail.yauhenizhukovich.app.service.util.conversion.UserConversionUtil.convertDTOToDatabaseObject;
+import static com.gmail.yauhenizhukovich.app.service.util.conversion.UserConversionUtil.convertDatabaseObjectToDTOToLogin;
+import static com.gmail.yauhenizhukovich.app.service.util.conversion.UserConversionUtil.convertDatabaseObjectToUserDTO;
+import static com.gmail.yauhenizhukovich.app.service.util.conversion.UserConversionUtil.convertDatabaseObjectToUserProfileDTO;
 
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
 
+    private static final Logger logger = LogManager.getLogger(MethodHandles.lookup().lookupClass());
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
-    public UserServiceImpl(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(
+            UserRepository userRepository,
+            @Lazy PasswordEncoder passwordEncoder,
+            EmailService emailService
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+    }
+
+    @Override
+    public UserDTO addUser(AddUserDTO userDTO) throws UserExistenceException {
+        String email = userDTO.getEmail();
+        if (userRepository.getUserByEmail(email) != null) {
+            throw new UserExistenceException();
+        }
+        User user = convertDTOToDatabaseObject(userDTO);
+        UUID uniqueNumber = UUID.randomUUID();
+        user.setUniqueNumber(uniqueNumber.toString());
+        setPasswordAndSendToEmail(user);
+        user = userRepository.add(user);
+        return convertDatabaseObjectToUserDTO(user);
+    }
+
+    @Override
+    public ObjectsDTOAndPagesEntity<UsersDTO> getUsersByPage(int page) {
+        int startPosition = getStartPositionByPageNumber(page, COUNT_OF_USERS_BY_PAGE);
+        List<User> users = userRepository.getPaginatedObjects(startPosition, COUNT_OF_USERS_BY_PAGE);
+        int pages = getPages();
+        List<UsersDTO> usersDTO = getUsersDTO(users);
+        return new ObjectsDTOAndPagesEntity<>(pages, usersDTO);
     }
 
     @Override
@@ -57,35 +95,6 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         return convertDatabaseObjectToDTOToLogin(user);
-    }
-
-    @Override
-    public List<UsersDTO> getUsersByPage(int page) {
-        int startPosition = getStartPositionByPageNumber(page, COUNT_OF_USERS_BY_PAGE);
-        List<User> users = userRepository.getObjectsByStartPositionAndMaxResult(startPosition, COUNT_OF_USERS_BY_PAGE);
-        return users.stream()
-                .map(UserConversionUtil::convertDatabaseObjectToUsersDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public int getCountOfPages() {
-        Long countOfUsers = userRepository.getCountOfObjects();
-        return getCountOfPagesByCountOfObjects(countOfUsers, COUNT_OF_USERS_BY_PAGE);
-    }
-
-    @Override
-    public UserDTO addUser(AddUserDTO userDTO) throws UserExistenceException {
-        String email = userDTO.getEmail();
-        if (userRepository.getUserByEmail(email) != null) {
-            throw new UserExistenceException("UserExistenceException");     // TODO
-        }
-        User user = convertDTOToDatabaseObject(userDTO);
-        UUID uniqueNumber = UUID.randomUUID();
-        user.setUniqueNumber(uniqueNumber.toString());
-        setPasswordAndSendToEmail(user);
-        user = userRepository.add(user);
-        return convertDatabaseObjectToUserDTO(user);
     }
 
     @Override
@@ -107,12 +116,17 @@ public class UserServiceImpl implements UserService {
             if (user.getRole() == RoleEnumRepository.ADMINISTRATOR) {
                 countOfAdministratorsToDelete++;
                 if (countOfDatabaseAdministrators == countOfAdministratorsToDelete) {
-                    throw new AdministratorChangingException("exc");
+                    logger.error(getAuthenticationName() + " tried to delete last administrators.");
+                    throw new AdministratorChangingException();
                 }
             }
             usersToDelete.add(user);
         }
-        usersToDelete.forEach(userRepository::delete);
+        for (User user : usersToDelete) {
+            user.getArticles().forEach(article -> article.setAuthor(null));
+            user.getOrders().forEach(order -> order.setCustomer(null));
+            userRepository.delete(user);
+        }
         return true;
     }
 
@@ -126,7 +140,8 @@ public class UserServiceImpl implements UserService {
             if (updatedUser.getRole() != RoleEnumService.ADMINISTRATOR) {
                 int countOfAdministrators = getCountOfDatabaseAdministrators();
                 if (countOfAdministrators == 1) {
-                    throw new AdministratorChangingException("AdministratorChangingException");    //  TODO
+                    logger.error(getAuthenticationName() + " tried to change last administrators role.");
+                    throw new AdministratorChangingException();
                 }
             }
         }
@@ -139,24 +154,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileDTO getUserProfile() throws AnonymousUserException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getName().equals("anonymousUser")) {
-            throw new AnonymousUserException("AnonymousUserException");    // TODO
+        String authenticationName = getAuthenticationName();
+        if (authenticationName.equals(ANONYMOUS_USER_NAME)) {
+            throw new AnonymousUserException();
         }
-        User user = userRepository.getUserByEmail(authentication.getName());
+        User user = userRepository.getUserByEmail(authenticationName);
         return convertDatabaseObjectToUserProfileDTO(user);
     }
 
     @Override
     public UserProfileDTO updateUserProfile(UpdateUserProfileDTO userDTO) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.getUserByEmail(authentication.getName());
+        String email = getAuthenticationName();
+        User user = userRepository.getUserByEmail(email);
         UserDetails userDetails = user.getUserDetails();
         setUserDetails(userDTO, userDetails);
         if (userDTO.getUpdatePassword()) {
             setPasswordAndSendToEmail(user);
         }
         return convertDatabaseObjectToUserProfileDTO(user);
+    }
+
+    private String getAuthenticationName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
+    }
+
+    private int getPages() {
+        Long countOfReviews = userRepository.getCountOfObjects();
+        return getCountOfPagesByCountOfObjects(countOfReviews, COUNT_OF_USERS_BY_PAGE);
+    }
+
+    private List<UsersDTO> getUsersDTO(List<User> users) {
+        return users.stream()
+                .map(UserConversionUtil::convertDatabaseObjectToUsersDTO)
+                .collect(Collectors.toList());
     }
 
     private void setUserDetails(UpdateUserProfileDTO userDTO, UserDetails userDetails) {
@@ -170,7 +201,9 @@ public class UserServiceImpl implements UserService {
         String password = RandomString.make();
         String encodedPassword = passwordEncoder.encode(password);
         user.setPassword(encodedPassword);
-        //        EmailUtil.sendPassword(user.getEmail(), password);            TODO
+        logger.debug("User password was successfully updated.");
+        emailService.sendMessage(user.getEmail(), MAIL_TITLE, MAIL_TEXT + password);
+        logger.debug("Email was successfully sent.");
     }
 
     private int getCountOfDatabaseAdministrators() {

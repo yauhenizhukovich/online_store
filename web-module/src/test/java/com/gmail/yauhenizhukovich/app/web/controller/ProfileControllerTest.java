@@ -1,19 +1,37 @@
 package com.gmail.yauhenizhukovich.app.web.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.gmail.yauhenizhukovich.app.service.OrderService;
 import com.gmail.yauhenizhukovich.app.service.UserService;
 import com.gmail.yauhenizhukovich.app.service.exception.AnonymousUserException;
+import com.gmail.yauhenizhukovich.app.service.model.ObjectsDTOAndPagesEntity;
+import com.gmail.yauhenizhukovich.app.service.model.order.OrdersDTO;
 import com.gmail.yauhenizhukovich.app.service.model.user.UserProfileDTO;
+import com.gmail.yauhenizhukovich.app.web.controller.config.UnitTestConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.PAGE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.PAGES;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_ADDRESS;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_AMOUNT;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_FIRST_NAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_LAST_NAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_NAME;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_PRICE;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_STATUS;
+import static com.gmail.yauhenizhukovich.app.web.controller.constant.TestConstant.VALID_TELEPHONE;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,19 +40,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ProfileController.class)
+@Import(UnitTestConfig.class)
 @WithMockUser(roles = "CUSTOMER_USER")
 class ProfileControllerTest {
 
-    private static final String VALID_ADDRESS = "Brest, ul. Sovietskaya, 23";
-    private static final String VALID_FIRST_NAME = "Misha";
-    private static final String VALID_LAST_NAME = "Mihailov";
-    private static final String VALID_TELEPHONE = "80292258422";
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private UserService userService;
     @MockBean
-    private UserDetailsService userDetailsService;
+    private OrderService orderService;
 
     @Test
     void getProfile_returnStatusOk() throws Exception, AnonymousUserException {
@@ -158,6 +173,25 @@ class ProfileControllerTest {
         Assertions.assertThat(actualContent).contains(VALID_TELEPHONE);
     }
 
+    @Test
+    void getUserOrdersByProfile_returnStatusOk() throws Exception, AnonymousUserException {
+        ObjectsDTOAndPagesEntity<OrdersDTO> ordersAndPages = getOrdersAndPages();
+        when(orderService.getUserOrdersByPage(eq(PAGE))).thenReturn(ordersAndPages);
+        mockMvc.perform(get("/profile/orders")
+                .param("page", String.valueOf(PAGE)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getUserOrdersByProfile_callBusinessLogic() throws AnonymousUserException, Exception {
+        ObjectsDTOAndPagesEntity<OrdersDTO> ordersAndPages = getOrdersAndPages();
+        when(orderService.getUserOrdersByPage(eq(PAGE))).thenReturn(ordersAndPages);
+        mockMvc.perform(get("/profile/orders")
+                .param("page", String.valueOf(PAGE)))
+                .andExpect(status().isOk());
+        verify(orderService, times(1)).getUserOrdersByPage(eq(PAGE));
+    }
+
     private UserProfileDTO getUserForProfile() {
         UserProfileDTO user = new UserProfileDTO();
         user.setFirstName(VALID_FIRST_NAME);
@@ -165,6 +199,17 @@ class ProfileControllerTest {
         user.setAddress(VALID_ADDRESS);
         user.setTelephone(VALID_TELEPHONE);
         return user;
+    }
+
+    private ObjectsDTOAndPagesEntity<OrdersDTO> getOrdersAndPages() {
+        List<OrdersDTO> orders = new ArrayList<>();
+        OrdersDTO order = new OrdersDTO();
+        order.setStatus(VALID_STATUS);
+        order.setAmount(VALID_AMOUNT);
+        order.setPrice(VALID_PRICE);
+        order.setItemName(VALID_NAME);
+        orders.add(order);
+        return new ObjectsDTOAndPagesEntity<>(PAGES, orders);
     }
 
 }

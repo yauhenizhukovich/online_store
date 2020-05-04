@@ -1,4 +1,4 @@
-package com.gmail.yauhenizhukovich.app.service.util;
+package com.gmail.yauhenizhukovich.app.service.util.conversion;
 
 import com.gmail.yauhenizhukovich.app.repository.model.Item;
 import com.gmail.yauhenizhukovich.app.repository.model.ItemDetails;
@@ -22,7 +22,9 @@ public class ItemConversionUtil {
         itemDTO.setName(item.getName());
         itemDTO.setUniqueNumber(item.getUniqueNumber());
         itemDTO.setPrice(item.getPrice());
-        itemDTO.setDescription(item.getItemDetails().getDescription());
+        if (item.getItemDetails() != null) {
+            itemDTO.setDescription(item.getItemDetails().getDescription());
+        }
         return itemDTO;
     }
 

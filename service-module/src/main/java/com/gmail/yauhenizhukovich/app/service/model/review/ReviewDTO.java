@@ -4,11 +4,9 @@ import java.time.LocalDate;
 
 public class ReviewDTO {
 
-    private Long id;
     private String authorName;
-    private String reviewText;
     private LocalDate date;
-    private boolean active;
+    private String reviewText;
 
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
@@ -16,14 +14,6 @@ public class ReviewDTO {
 
     public String getAuthorName() {
         return authorName;
-    }
-
-    public void setReviewText(String reviewText) {
-        this.reviewText = reviewText;
-    }
-
-    public String getReviewText() {
-        return reviewText;
     }
 
     public void setDate(LocalDate date) {
@@ -34,20 +24,12 @@ public class ReviewDTO {
         return date;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setReviewText(String reviewText) {
+        this.reviewText = reviewText;
     }
 
-    public boolean getActive() {
-        return active;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
+    public String getReviewText() {
+        return reviewText;
     }
 
 }
