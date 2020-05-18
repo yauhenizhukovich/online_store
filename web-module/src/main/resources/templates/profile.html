@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+
+<body>
+<div class="container col-sm-9">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <h1 class="display-5 text-center font-italic"><strong>PROFILE</strong></h1>
+            </div>
+            <div class="col-sm"></div>
+        </div>
+    </div>
+
+    <!--JUST SHOW PROFILE-->
+    <div th:unless="${param.update} or ${update ne null}">
+        <div class="col-sm" th:object="${user}">
+            <dl class="row font-italic lead">
+                <dt class="col-sm-3">First name:</dt>
+                <dd class="col-sm-9" th:text="*{firstName}">Not defined</dd>
+
+                <dt class="col-sm-3">Last name:</dt>
+                <dd class="col-sm-9" th:text="*{lastName}">Not defined</dd>
+
+                <dt class="col-sm-3">Address:</dt>
+                <dd class="col-sm-9" th:text="*{address}">Not defined</dd>
+
+                <dt class="col-sm-3">Telephone:</dt>
+                <dd class="col-sm-9" th:text="*{telephone}">Not defined</dd>
+            </dl>
+            <a href="#" th:href="@{/profile(update)}" class="btn btn-success" role="button">
+                Update profile
+            </a>
+            <br><br>
+            <div class="col-sm-3 alert alert-info text-left" th:if="${message ne null}" th:text="${message}"/>
+            <br>
+            <a href="#" th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+        </div>
+        <br>
+        <div class="alert alert-danger" th:if="${param.error}" th:text="${param.error}"/>
+    </div>
+
+    <!--IF UPDATE MODE ACTIVATED-->
+    <div th:if="${param.update} or ${update}" th:object="${updatedUser}">
+        <div class="col-sm">
+            <form action="#" th:action="@{/profile}" method="post">
+
+                <!--IF FIELD HAS ERROR SET OLD VALUE-->
+                <div th:if="${#fields.hasErrors('firstName')}" class="form-group">
+                    <label for="firstNameInput" class="font-weight-normal">Set new first name:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"
+                           th:value="${user.firstName}" id="firstNameInput">
+                </div>
+
+                <!--IF OTHER FIELD HAS ERROR SET NEW VALUE-->
+                <div th:unless="${#fields.hasErrors('firstName')}" th:if="not ${#strings.isEmpty(user.firstName)}" class="form-group">
+                    <label for="firstNameInput" class="font-weight-normal">Set new first name:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="20" pattern="^[a-zA-Z]+$" name="firstName"
+                           th:value="${updatedUser.firstName}" id="firstNameInput">
+                </div>
+
+                <!--IF FIELD HAS ERROR SET OLD VALUE-->
+                <div th:if="${#fields.hasErrors('lastName')}" class="form-group">
+                    <label for="lastNameInput" class="font-weight-normal">Set new last name:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="lastName"
+                           th:value="${user.lastName}" id="lastNameInput">
+                </div>
+
+                <!--IF OTHER FIELD HAS ERROR SET NEW VALUE-->
+                <div th:unless="${#fields.hasErrors('lastName')}" th:if="not ${#strings.isEmpty(user.lastName)}" class="form-group">
+                    <label for="lastNameInput" class="font-weight-normal">Set new last name:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="40" pattern="^[a-zA-Z]+$" name="lastName"
+                           th:value="${updatedUser.lastName}" id="lastNameInput">
+                </div>
+
+                <!--IF FIELD HAS ERROR SET OLD VALUE-->
+                <div th:if="${#fields.hasErrors('address')}" class="form-group">
+                    <label for="addressInput" class="font-weight-normal">Set new address:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="100" name="address"
+                           th:value="${user.address}" id="addressInput">
+                </div>
+
+                <!--IF OTHER FIELD HAS ERROR SET NEW VALUE-->
+                <div th:unless="${#fields.hasErrors('address')}" class="form-group">
+                    <label for="addressInput" class="font-weight-normal">Set new address:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="100" name="address"
+                           th:value="${updatedUser.address}" id="addressInput">
+                </div>
+
+                <!--IF FIELD HAS ERROR SET OLD VALUE-->
+                <div th:if="${#fields.hasErrors('telephone')}" class="form-group">
+                    <label for="telephoneInput" class="font-weight-normal">Set new telephone:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="40" pattern="^[0-9+-]*$" name="telephone"
+                           th:value="${user.telephone}" id="telephoneInput">
+                </div>
+
+                <!--IF OTHER FIELD HAS ERROR SET NEW VALUE-->
+                <div th:unless="${#fields.hasErrors('telephone')}" class="form-group">
+                    <label for="telephoneInput" class="font-weight-normal">Set new telephone:</label>
+                    <input type="text" class="form-control" minlength="2" maxlength="40" pattern="^[0-9+-]*$" name="telephone"
+                           th:value="${updatedUser.telephone}" id="telephoneInput">
+                </div>
+
+                <div class="form-group">
+                    <label for="passwordInput" class="font-weight-bold lead">Reset password</label>
+                    <input type="checkbox" name="updatePassword" id="passwordInput"/>
+                </div>
+
+                <a href="#" th:href="@{/profile}" class="btn btn-primary" role="button">Back to profile</a>
+                <input type="submit" class="btn btn-primary" value="Accept changes">
+            </form>
+        </div>
+        <div class="col-sm-3">
+            <br>
+            <div class="alert alert-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"/>
+            <div class="alert alert-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"/>
+            <div class="alert alert-danger" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"/>
+            <div class="alert alert-danger" th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}"/>
+        </div>
+    </div>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

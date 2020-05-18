@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Article</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+
+<body>
+<!--IF ARTICLE DOESNT EXIST-->
+<div th:if="${article eq null}">
+    <h1 class="display-4 font-italic text-center"><strong>THIS ARTICLE DOESNT EXIST</strong></h1>
+    <div class="text-center">
+        <a href="#" th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    </div>
+</div>
+
+<div class="container col-sm-9" th:unless="${article eq null}">
+    <h1 class="display-4 font-italic text-center" th:text="${article.title}"><strong>ARTICLE</strong></h1>
+
+    <!-- JUST SHOW ARTICLE-->
+    <dl th:unless="${param.update} or ${update}">
+        <span class="font-italic lead font-weight-bold col-sm-9">
+            <span th:text="${article.date}+', '">Not defined</span>
+            <span th:unless="${article.authorFirstName eq null && article.authorLastName eq null}"
+                  th:text="${article.authorFirstName + ' ' + article.authorLastName}"></span>
+            <span th:if="${article.authorFirstName eq null && article.authorLastName eq null}">
+                Unknown author
+            </span>
+        </span>
+        <a th:if="${#authorization.expression('hasRole(''SALE_USER'')')}"
+           href="#" th:href="@{/articles/{id}(id=${article.id}, update)}" class="btn btn-success" role="button">
+            Update article
+        </a>
+        <br><br>
+        <div class=" font-italic lead font-weight-bold col-sm-9" th:text="${article.title}">Not defined</div>
+        <br>
+        <p class="col-sm-9" th:text="${article.content}"></p>
+        <br><br>
+
+        <!-- IF THERE ARE COMMENTS-->
+        <div th:unless="${#lists.isEmpty(article.comments)}">
+            <div class="lead font-italic font-weight-bold col-sm-4">Comments</div>
+            <ul class="list-unstyled col-sm-4" th:each="comment : ${article.comments}">
+                <div class="font-italic">
+                    <span th:text="${comment.date}"/>
+                    <span th:text="${', ' + comment.authorLastName + ' ' + comment.authorFirstName}"/>
+                </div>
+                <div>
+                    <span th:text="${comment.content}"/>
+                    <form th:if="${#authorization.expression('hasRole(''SALE_USER'')')}" action="#" method="post"
+                          th:action="@{/articles/{articleId}/comments/{commentId}(articleId=${article.id}, commentId=${comment.id})}">
+                        <input type="submit" class="btn btn-outline-secondary btn-sm" value="Delete comment"/>
+                    </form>
+                </div>
+            </ul>
+        </div>
+
+        <!-- IF THERE ARE NO COMMENTS-->
+        <div th:if="${#lists.isEmpty(article.comments)}">
+            <span class="lead font-italic">There are no comments...</span>
+        </div>
+
+        <a href="#" th:href="@{/articles}" class="btn btn-primary" role="button">Back to articles</a>
+        <a href="#" th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+        <a th:if="${#authorization.expression('hasRole(''SALE_USER'')')}" th:href="@{/articles/add}" class="btn btn-primary"
+           role="button">Add new article</a>
+    </dl>
+</div>
+
+<!--IF UPDATE MODE ACTIVATED-->
+<div th:if="${param.update} or ${update}" th:object="${updatedArticle}">
+    <div class="col-sm">
+        <form action="#" th:action="@{/articles/{id}(id=${article.id})}" method="post">
+
+            <!--IF FIELD HAS ERROR SET OLD VALUE-->
+            <div th:if="${#fields.hasErrors('title')}" class="form-group">
+                <label for="titleInput" class="font-weight-normal">Set new title:</label>
+                <input type="text" class="form-control" minlength="2" maxlength="100" pattern="^[a-zA-Z, -]+$" name="title"
+                       th:value="${article.title}" id="titleInput">
+            </div>
+
+            <!--IF OTHER FIELD HAS ERROR SET NEW VALUE-->
+            <div th:unless="${#fields.hasErrors('title')}" th:if="not ${#strings.isEmpty(article.title)}" class="form-group">
+                <label for="titleInput" class="font-weight-normal">Set new title:</label>
+                <input type="text" class="form-control" minlength="2" maxlength="100" pattern="^[a-zA-Z ,-]+$" name="title"
+                       th:value="${updatedArticle.title}" id="titleInput">
+            </div>
+
+            <!--IF FIELD HAS ERROR SET OLD VALUE-->
+            <div class="form-group" th:if="${#fields.hasErrors('content')}">
+                <label for="contentInput" class="font-weight-normal">Set new content:</label>
+                <textarea class="form-control" minlength="2" maxlength="1000" name="content"
+                          id="contentInput" th:inline="text">[[${article.content}]]</textarea>
+            </div>
+
+            <!--IF OTHER FIELD HAS ERROR SET NEW VALUE-->
+            <div class="form-group" th:unless="${#fields.hasErrors('content')}" th:if="not ${#strings.isEmpty(article.content)}">
+                <label for="contentInput" class="font-weight-normal">Set new content:</label>
+                <textarea class="form-control" minlength="2" maxlength="1000" name="content"
+                          id="contentInput" th:inline="text">[[${updatedArticle.content}]]</textarea>
+            </div>
+            <a href="#" th:href="@{/articles/{id}(id=${article.id})}" class="btn btn-primary" role="button">Back to article</a>
+            <input type="submit" class="btn btn-primary" value="Accept changes">
+        </form>
+    </div>
+    <div class="col-sm-3">
+        <br>
+        <div class="alert alert-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"/>
+        <div class="alert alert-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"/>
+    </div>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

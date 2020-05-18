@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Item</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div th:if="${item eq null}">
+    <h1 class="display-4 font-italic text-center"><strong>THIS ITEM DOESNT EXIST</strong></h1>
+    <div class="text-center">
+        <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    </div>
+</div>
+<div class="container" th:unless="${item eq null}" th:object="${item}">
+    <div>
+        <div class="row">
+            <div class="col-sm">
+                <h1 class="display-5 text-center font-italic"><strong th:text="*{name}">ITEM</strong></h1>
+            </div>
+            <div class="col-sm"></div>
+        </div>
+    </div>
+    <div class="col-sm">
+        <dl class="row font-italic lead">
+
+            <dt class="col-sm-3">Name:</dt>
+            <dd class="col-sm-9" th:text="*{name}">Not defined</dd>
+
+            <dt class="col-sm-3">Unique number:</dt>
+            <dd class="col-sm-9" th:text="*{uniqueNumber}">Not defined</dd>
+
+            <dt class="col-sm-3">Price:</dt>
+            <dd class="col-sm-9" th:text="*{price}">Not defined</dd>
+
+            <dt class="col-sm-3">Description:</dt>
+            <dd class="col-sm-9" th:text="*{description}">Not defined</dd>
+
+        </dl>
+    </div>
+    <a href="#" th:href="@{/items}" class="btn btn-primary" role="button">Back to items</a>
+    <a href="#" th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

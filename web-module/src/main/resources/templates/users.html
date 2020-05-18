@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Users</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-4 text-center font-italic"><strong>USERS</strong></h1>
+<div class="col" th:if="${not #lists.isEmpty(users)}">
+    <form action="#" th:action="@{/users/delete}" method="post">
+        <table class="table table-bordered text-center">
+            <thead>
+            <tr>
+                <td></td>
+                <td scope="col">#</td>
+                <td scope="col">Full name</td>
+                <td scope="col">Email</td>
+                <td scope="col">Role</td>
+                <td></td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user, status : ${users}">
+                <div th:object="${user}">
+                    <td>
+                        <input type="checkbox" name="uniqueNumbers" th:value="*{uniqueNumber}"/>
+                    </td>
+                    <td th:text="${status.count}"/>
+                    <td th:text="*{lastName + ' ' + firstName + ' ' + patronymic}">Name not defined</td>
+                    <td th:text="*{email}">Email not defined</td>
+                    <td th:value="*{role}" th:text="*{
+                                #strings.substring(role,0,1)
+                                .concat(#strings.substring(role,1)
+                                .toLowerCase()
+                                .replace('_',' '))
+                                }">
+                        Role not defined
+                    </td>
+                    <td>
+                        <a th:href="@{/users/{uniqueNumber}(uniqueNumber=${user.uniqueNumber})}"
+                           class="btn btn-primary" role="button">Edit user data</a>
+                    </td>
+                </div>
+            </tr>
+            </tbody>
+        </table>
+        <div class="alert alert-danger" th:if="${param.message}" th:text="${param.message}">
+        </div>
+        <nav th:if="${pages gt 1}">
+            <ul class="pagination justify-content-center">
+                <li th:each="page: ${#numbers.sequence(1, pages)}" class="page-item active">
+                    <a class="page-link" th:name="'page' + ${page}" th:href="@{/users(page=${page})}" th:text="${page}"
+                       th:value="${page}"/>
+                </li>
+            </ul>
+        </nav>
+        <br>
+        <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+        <a th:href="@{/users/add}" class="btn btn-primary" role="button">Add new user</a>
+        <input type="submit" class="btn btn-danger" value="Delete checked users"/>
+    </form>
+</div>
+<div class="lead text-center" th:unless="${not #lists.isEmpty(users)}">
+    <p>There are no users...</p>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    <a th:href="@{/users/add}" class="btn btn-primary" role="button">Add new user</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

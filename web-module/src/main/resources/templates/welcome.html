@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Welcome page</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div th:unless="${#authorization.expression('isAuthenticated()')}">
+    <h1 class="display-3 text-center font-italic"><strong>YOU SHOULD LOG IN TO GET ACCESS</strong></h1>
+</div>
+<div th:if="${#authorization.expression('isAuthenticated()')}">
+    <div th:if="${#authorization.expression('hasRole(''ADMINISTRATOR'')')}">
+        <h1 class="display-3 text-center font-italic"><strong>ADMINISTRATOR ACCESS AREA</strong></h1>
+        <a href="#" th:href="@{/users}" class="btn btn-success btn-lg btn-block" role="button">Users</a>
+        <a href="#" th:href="@{/reviews}" class="btn btn-success btn-lg btn-block" role="button">Reviews</a>
+        <a href="#" th:href="@{/profile}" class="btn btn-success btn-lg btn-block" role="button">Check your profile</a>
+    </div>
+
+    <div th:if="${#authorization.expression('hasRole(''CUSTOMER_USER'')')}">
+        <h1 class="display-3 text-center font-italic"><strong>CUSTOMER ACCESS AREA</strong></h1>
+        <a href="#" th:href="@{/articles}" class="btn btn-success btn-lg btn-block" role="button">Articles</a>
+        <a href="#" th:href="@{/items}" class="btn btn-success btn-lg btn-block" role="button">Items</a>
+        <a href="#" th:href="@{/profile/orders}" class="btn btn-success btn-lg btn-block" role="button">My orders</a>
+        <a href="#" th:href="@{/reviews/add}" class="btn btn-success btn-lg btn-block" role="button">Add review</a>
+        <a href="#" th:href="@{/profile}" class="btn btn-success btn-lg btn-block" role="button">Check your profile</a>
+    </div>
+
+    <div th:if="${#authorization.expression('hasRole(''SALE_USER'')')}">
+        <h1 class="display-3 text-center font-italic"><strong>SALE USER ACCESS AREA</strong></h1>
+        <a href="#" th:href="@{/articles}" class="btn btn-success btn-lg btn-block" role="button">Articles</a>
+        <a href="#" th:href="@{/items}" class="btn btn-success btn-lg btn-block" role="button">Items</a>
+        <a href="#" th:href="@{/orders}" class="btn btn-success btn-lg btn-block" role="button">Orders</a>
+        <a href="#" th:href="@{/profile}" class="btn btn-success btn-lg btn-block" role="button">Check your profile</a>
+    </div>
+</div>
+<br>
+<div class="text-center">
+    <div class="alert alert-info text-center" th:if="${param.message}" th:text="${param.message}"/>
+    <br>
+    <a href="#" th:href="@{/login}" class="btn btn-primary btn-lg" role="button">Log in</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

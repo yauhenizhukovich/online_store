@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Articles</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-4 font-italic text-center"><strong>ARTICLES</strong></h1>
+<div class="col" th:if="${not #lists.isEmpty(articles)}">
+    <table class="table table-borderless">
+        <tbody>
+        <tr th:each="article, status : ${articles}">
+            <td class="font-weight-bold" th:text="${status.count}"></td>
+            <td class="font-weight-bold">
+                <div th:text="${article.date}">Date not defined</div>
+            </td>
+            <td th:unless="${article.authorFirstName eq null && article.authorLastName eq null}"
+                th:text="${article.authorFirstName + ' ' + article.authorLastName}" class="font-weight-bold"></td>
+            <td th:if="${article.authorFirstName eq null && article.authorLastName eq null}"
+                class="font-weight-bold">
+                Unknown author
+            </td>
+            <td class="col-sm-4">
+                <div class="font-weight-bold" th:text="${article.title}">Title not defined</div>
+                <div th:text="${article.rundown}+'...'">Rundown not defined</div>
+            </td>
+            <td>
+                <a th:href="@{/articles/{id}(id=${article.id})}" class="btn btn-success"
+                   role="button">Full article</a>
+            </td>
+            <td th:if="${#authorization.expression('hasRole(''SALE_USER'')')}">
+                <form th:action="@{/articles/{id}/delete(id=${article.id})}" method="post">
+                    <input type="submit" class="btn btn-primary" value="Delete article"/>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav th:if="${pages gt 1}">
+        <ul class="pagination justify-content-center">
+            <li th:each="page: ${#numbers.sequence(1, pages)}" class="page-item active">
+                <a class="page-link" th:name="'page' + ${page}" th:href="@{/articles(page=${page})}" th:text="${page}"
+                   th:value="${page}"/>
+            </li>
+        </ul>
+    </nav>
+    <br>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    <a th:if="${#authorization.expression('hasRole(''SALE_USER'')')}" th:href="@{/articles/add}" class="btn btn-primary" role="button">Add
+        new article</a>
+</div>
+<div class="lead text-center" th:unless="${not #lists.isEmpty(articles)}">
+    <p>There are no articles...</p>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    <a th:if="${#authorization.expression('hasRole(''SALE_USER'')')}" th:href="@{/articles/add}" class="btn btn-primary" role="button">Add
+        new article</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

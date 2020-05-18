@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Orders</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<h1 class="display-4 text-center font-italic"><strong>ORDERS</strong></h1>
+<div class="col" th:if="${not #lists.isEmpty(orders)}">
+    <table class="table table-bordered text-center">
+        <thead>
+        <tr>
+            <td scope="col">#</td>
+            <td scope="col">Status</td>
+            <td scope="col">Item name</td>
+            <td scope="col">Amount</td>
+            <td scope="col">Final price</td>
+            <td th:unless="${#authorization.expression('hasRole(''CUSTOMER_USER'')')}"></td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <div th:object="${order}">
+                <td th:text="*{id}"/>
+                <td th:text="*{
+                                #strings.substring(status,0,1)
+                                .concat(#strings.substring(status,1)
+                                .toLowerCase()
+                                .replace('_',' '))
+                                }">Status not defined
+                </td>
+                <td th:text="*{itemName}">Item name not defined</td>
+                <td th:text="*{amount}">
+                    Amount not defined
+                </td>
+                <td th:text="*{price}">
+                    Price not defined
+                </td>
+                <td th:unless="${#authorization.expression('hasRole(''CUSTOMER_USER'')')}">
+                    <a th:href="@{/orders/{id}(id=*{id})}" class="btn btn-primary" role="button">Order details</a>
+                </td>
+            </div>
+        </tr>
+        </tbody>
+    </table>
+    <nav th:if="${pages gt 1}">
+        <ul class="pagination justify-content-center">
+            <li th:each="page: ${#numbers.sequence(1, pages)}" class="page-item active">
+                <a th:if="${#authorization.expression('hasRole(''CUSTOMER_USER'')')}" class="page-link" th:name="'page' + ${page}"
+                   th:href="@{/profile/orders(page=${page})}" th:text="${page}"
+                   th:value="${page}"/>
+                <a th:unless="${#authorization.expression('hasRole(''CUSTOMER_USER'')')}" class="page-link" th:name="'page' + ${page}"
+                   th:href="@{/orders(page=${page})}" th:text="${page}"
+                   th:value="${page}"/>
+            </li>
+        </ul>
+    </nav>
+    <br>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<div class="lead text-center" th:unless="${not #lists.isEmpty(orders)}">
+    <p>There are no orders...</p>
+    <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Order</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1-1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div th:if="${order eq null}">
+    <h1 class="display-4 font-italic text-center"><strong>THIS ORDER OR CUSTOMER DOESNT EXIST</strong></h1>
+    <div class="text-center">
+        <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    </div>
+</div>
+<div th:unless="${order eq null}">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <h1 class="display-5 text-center font-italic"><strong>ORDER</strong></h1>
+            </div>
+            <div class="col-sm"></div>
+        </div>
+    </div>
+
+    <div class="col-sm container" th:object="${order}">
+        <dl class="row font-italic lead">
+
+            <dt class="col-sm-3">Number:</dt>
+            <dd class="col-sm-9" th:text="*{id}">Not defined</dd>
+
+            <dt class="col-sm-3">Status:</dt>
+            <dd class="col-sm-9" th:text="*{
+                                #strings.substring(status,0,1)
+                                .concat(#strings.substring(status,1)
+                                .toLowerCase()
+                                .replace('_',' '))
+                                }">Not defined
+            </dd>
+
+            <dt class="col-sm-3">Item name:</dt>
+            <dd class="col-sm-9" th:text="*{itemName}">Not defined</dd>
+
+            <dt class="col-sm-3">Amount:</dt>
+            <dd class="col-sm-9" th:text="*{amount}">Not defined</dd>
+
+            <dt class="col-sm-3">Final price:</dt>
+            <dd class="col-sm-9" th:text="*{price}">Not defined</dd>
+
+            <div th:if="*{customerTelephone eq null && customerUniqueNumber eq null}">
+                <dt class="col-sm-3">Unknown customer</dt>
+            </div>
+            <dt th:unless="*{customerTelephone eq null && customerUniqueNumber eq null}" class="col-sm-3">Customer unique number:</dt>
+            <dd th:unless="*{customerTelephone eq null && customerUniqueNumber eq null}" class="col-sm-9" th:text="*{customerUniqueNumber}">
+                Not defined
+            </dd>
+
+            <dt th:unless="*{customerTelephone eq null && customerUniqueNumber eq null}" class="col-sm-3">Customer telephone:</dt>
+            <dd th:unless="*{customerTelephone eq null && customerUniqueNumber eq null}" class="col-sm-9" th:text="*{customerTelephone}">Not
+                defined
+            </dd>
+        </dl>
+    </div>
+    <form action="#" th:action="@{/orders/{id}/update(id=${id})}" method="post">
+        <div class="col-sm">
+            <div class="form-group">
+                <label for="statusInput" class="font-weight-bold lead">Update status:</label>
+                <select name="status" class="form-control col-sm-2" id="statusInput">
+                    <option th:each="status : ${statuses}"
+                            th:text="${
+                                #strings.substring(status,0,1)
+                                .concat(#strings.substring(status,1)
+                                .toLowerCase()
+                                .replace('_',' '))
+                                }"
+                            th:value="${status}"/>
+                </select>
+            </div>
+            <div class="col-sm-3 alert alert-info text-left" th:if="${message ne null}" th:text="${message}"/>
+            <input type="submit" class="btn btn-success" value="Update order"/>
+        </div>
+    </form>
+    <br>
+    <div class="col-sm">
+        <a th:href="@{/orders}" class="btn btn-primary" role="button">Back to orders</a>
+        <a th:href="@{/}" class="btn btn-primary" role="button">Back to start page</a>
+    </div>
+</div>
+<script th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
+</body>
+</html>
